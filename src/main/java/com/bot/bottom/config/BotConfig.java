@@ -11,6 +11,8 @@ public class BotConfig {
     String botName;
     @Value("${bot.token}")
     String token;
+    @Value("${file.prefix}")
+    String prefix;
 
     public String getBotName() {
         return botName;
@@ -18,5 +20,9 @@ public class BotConfig {
 
     public String getToken() {
         return token;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }
