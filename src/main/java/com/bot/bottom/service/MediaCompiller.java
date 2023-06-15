@@ -3,7 +3,6 @@ package com.bot.bottom.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaDocument;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;

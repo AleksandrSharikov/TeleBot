@@ -5,6 +5,7 @@ import com.bot.bottom.repository.MemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MemDaoImpl implements MemDao{
@@ -23,4 +24,20 @@ public class MemDaoImpl implements MemDao{
     public List<Mem> findAll() {
         return memRepository.findAll();
     }
+
+    @Override
+    public Optional<Mem> findByName(String name) {
+        return memRepository.findById(name);
+    }
+
+    @Override
+    public List<Mem> findByKeyword(String keyword) {
+        return memRepository.getAllAddresses(keyword);
+    }
+
+    @Override
+    public void deleteAll() {
+        memRepository.deleteAll();
+    }
+
 }

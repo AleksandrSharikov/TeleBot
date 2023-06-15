@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface MemRepository extends MongoRepository<Mem, String> {
-    @Query(value = "{keyWord :?0}", fields = "{'address' : 1}")
-    List<Mem> getAllAddreses(String keyWord);
+    @Query(value = "{keyWord :?0}")
+    List<Mem> getAllAddresses(String keyWord);
 }

@@ -9,10 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class Selector {
     public int select(Update update){
         log.info("Selector get message " + update);
-      //  String inText = update.getMessage().getText();
-     //   if(inText.equals("Загадай цифру")){
-      //      return 1;
-     //   }
+
         if (update.getMessage().hasPhoto()){
             log.info("Selector detect photo and set 2");
             return 2;
@@ -30,6 +27,9 @@ public class Selector {
             return 5;
         }
         if (update.getMessage().hasText()){
+            if (update.getMessage().getText().equalsIgnoreCase("Здрасте")){
+                return 21;
+            }
             return 20;
         }
         return 0;

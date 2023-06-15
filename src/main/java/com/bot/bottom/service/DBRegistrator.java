@@ -31,16 +31,16 @@ public class DBRegistrator {
                 caption = update.getMessage().getCaption();
                 if (caption.charAt(0) == '"'){
                    parts = caption.split("\"");
-                   name = parts[0];
-                   keyword = parts.length > 1 ? parts[1] : "unsorted";
+                   name = parts[0].toLowerCase();
+                   keyword = parts.length > 1 ? parts[1].toLowerCase() : "unsorted";
                 } else {
                     name = String.valueOf(update.getUpdateId());
-                    keyword = caption;
+                    keyword = caption.toLowerCase();
                 }
             }
             Mem mem = new Mem(keyword,address,name,null,type,time);
             memDao.save(mem);
-            log.info("Added to DB: " + mem.toString());
+            log.info("Added to DB: " + mem);
         return mem;
     }
 

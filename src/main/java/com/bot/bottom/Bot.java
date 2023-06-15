@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import javax.print.attribute.standard.Media;
 import java.io.File;
 import java.util.List;
 
@@ -29,12 +30,11 @@ public class Bot extends TelegramLongPollingBot {
     private final MediaCompiller mediaCompiller;
     private final Search search;
     private final DBRegistrator dbRegistrator;
-    private boolean gameFlag;
     private long chatId;
     private String inText;
     private String name;
 
-    private String adreses;
+    private String addresses;
 
     private final String prefix = "./data/userDoc/";
 
@@ -48,7 +48,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        int way = 0;
+        int way;
         chatId = update.getMessage().getChatId();
         inText = update.getMessage().getText() == null ?
                 "no_text" : update.getMessage().getText();
@@ -64,7 +64,7 @@ public class Bot extends TelegramLongPollingBot {
             case 4 -> receiveVideo(update);
             case 5 -> receiveAnimation(update);
             case 20 -> returnMems(update);
-
+            case 21 -> sendMessage("Забор покрасьте!");
         }
     }
 
@@ -79,10 +79,10 @@ public class Bot extends TelegramLongPollingBot {
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            adreses = prefix +getID+"_"+doc_name+ ".jpg";
-            downloadFile(file, new File(adreses));
-            dbRegistrator.register(update,adreses,2);
-            log.info("File " + adreses + "Saved");
+            addresses = prefix +getID+"_"+doc_name+ ".jpg";
+            downloadFile(file, new File(addresses));
+            dbRegistrator.register(update, addresses,2);
+            log.info("File " + addresses + "Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
             log.error(e.getMessage());
@@ -102,10 +102,10 @@ public class Bot extends TelegramLongPollingBot {
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            adreses = prefix+getID+"_"+doc_name+ ".mp4";
-            downloadFile(file, new File(adreses));
-            dbRegistrator.register(update, adreses, 3);
-            log.info("File " + adreses + " Saved");
+            addresses = prefix+getID+"_"+doc_name+ ".mp4";
+            downloadFile(file, new File(addresses));
+            dbRegistrator.register(update, addresses, 3);
+            log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
             log.error(e.getMessage());
@@ -123,10 +123,10 @@ public class Bot extends TelegramLongPollingBot {
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            adreses = prefix+getID+"_"+doc_name+ ".mp4";
-            downloadFile(file, new File(adreses));
-            dbRegistrator.register(update, adreses, 4);
-            log.info("File " + adreses + " Saved");
+            addresses = prefix+getID+"_"+doc_name+ ".mp4";
+            downloadFile(file, new File(addresses));
+            dbRegistrator.register(update, addresses, 4);
+            log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
             log.error(e.getMessage());
@@ -144,10 +144,10 @@ public class Bot extends TelegramLongPollingBot {
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            adreses = prefix+getID+"_"+doc_name+ ".gif";
-            downloadFile(file, new File(adreses));
-            dbRegistrator.register(update, adreses, 4);
-            log.info("File " + adreses + " Saved");
+            addresses = prefix+getID+"_"+doc_name+ ".gif";
+            downloadFile(file, new File(addresses));
+            dbRegistrator.register(update, addresses, 4);
+            log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
             log.error(e.getMessage());
@@ -157,18 +157,26 @@ public class Bot extends TelegramLongPollingBot {
 
 
     private void returnMems(Update update){
-        sendMedia(mediaCompiller.addressToMedia(search.search(update.getMessage().getText())));
+        List<String> mems = search.search(update.getMessage().getText());
+        if(mems.size() > 1){
+            List<InputMedia> mediaList = mediaCompiller.addressToMedia(mems);
+            for(InputMedia  media : mediaList){
+                System.out.println(media.getType());
+            }
+        sendMedia(mediaCompiller.addressToMedia(mems));
+        }
+        if(mems.size() == 1){
+            sendMessage("Function in delivering");
+        }
+        if (mems.isEmpty()){
+            sendMessage("nothing have been found");
+        }
     }
 
     private void game() {
     }
 
-    private int choose() {
-        if(inText.equals("Загадай цифру")){
-            return 1;
-        }
-        return 0;
-    }
+
 
 
     private void sendMessage(String textToSend){

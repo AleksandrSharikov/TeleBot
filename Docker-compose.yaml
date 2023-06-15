@@ -1,0 +1,12 @@
+services:
+  bot:
+    container_name: telegram-bot
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - 8081:8081
+  MongoDB:
+    image: mongo
+    container_name: "membase"
+    ports:
+      - 27017:27017
