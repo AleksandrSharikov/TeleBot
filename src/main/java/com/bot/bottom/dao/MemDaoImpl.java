@@ -16,8 +16,18 @@ public class MemDaoImpl implements MemDao{
     }
 
     @Override
-    public void save(Mem mem){
-        memRepository.save(mem);
+    public Mem save(Mem mem){
+        if(memRepository.findById(mem.getName()).isEmpty()){
+        memRepository.save(mem);} else {
+            String name = mem.getName();
+            int i = 1;
+            while(!memRepository.findById(name + "_" + i).isEmpty()){
+                i++;
+            }
+            mem.setName(name + "_" + i);
+            memRepository.save(mem);
+        }
+        return mem;
     }
 
     @Override

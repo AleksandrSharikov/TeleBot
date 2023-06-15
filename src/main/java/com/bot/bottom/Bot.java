@@ -1,10 +1,7 @@
 package com.bot.bottom;
 
 import com.bot.bottom.config.BotConfig;
-import com.bot.bottom.service.DBRegistrator;
-import com.bot.bottom.service.MediaCompiller;
-import com.bot.bottom.service.Search;
-import com.bot.bottom.service.Selector;
+import com.bot.bottom.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,10 +14,8 @@ import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.print.attribute.standard.Media;
 import java.io.File;
 import java.util.List;
-
 
 @Slf4j
 @Component
@@ -30,30 +25,31 @@ public class Bot extends TelegramLongPollingBot {
     private final MediaCompiller mediaCompiller;
     private final Search search;
     private final DBRegistrator dbRegistrator;
+    private final ThankYou thankYou;
+    private final UserService userService;
     private long chatId;
     private String inText;
-    private String name;
+    private final String doc_name = "0";
 
     private String addresses;
 
     private final String prefix = "./data/userDoc/";
 
-    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator) {
+    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, ThankYou thankYou, UserService userService) {
         this.botConfig = botConfig;
         this.selector = selector;
         this.mediaCompiller = mediaCompiller;
         this.search = search;
         this.dbRegistrator = dbRegistrator;
+        this.thankYou = thankYou;
+        this.userService = userService;
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         int way;
         chatId = update.getMessage().getChatId();
-        inText = update.getMessage().getText() == null ?
-                "no_text" : update.getMessage().getText();
-        name = update.getMessage().getFrom().getFirstName();
-
+        userService.getUserInfo(update);
 
 
         way = selector.select(update);
@@ -75,13 +71,12 @@ public class Bot extends TelegramLongPollingBot {
 
         getFile.setFileId(photoList.get(photoList.size() - 1).getFileId());
         String  getID = String.valueOf(update.getUpdateId());
-        String doc_name = update.getMessage().getCaption() == null ? "notTitle" : update.getMessage().getCaption();
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
             addresses = prefix +getID+"_"+doc_name+ ".jpg";
             downloadFile(file, new File(addresses));
-            dbRegistrator.register(update, addresses,2);
+            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 2)));
             log.info("File " + addresses + "Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
@@ -98,13 +93,12 @@ public class Bot extends TelegramLongPollingBot {
 
         getFile.setFileId(videoNote.getFileId());
         String  getID = String.valueOf(update.getUpdateId());
-        String doc_name = update.getMessage().getCaption() == null ? "notTitle" : update.getMessage().getCaption();
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
             addresses = prefix+getID+"_"+doc_name+ ".mp4";
             downloadFile(file, new File(addresses));
-            dbRegistrator.register(update, addresses, 3);
+            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 3)));
             log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
@@ -119,13 +113,12 @@ public class Bot extends TelegramLongPollingBot {
 
         getFile.setFileId(video.getFileId());
         String  getID = String.valueOf(update.getUpdateId());
-        String doc_name = update.getMessage().getCaption() == null ? "notTitle" : update.getMessage().getCaption();
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
             addresses = prefix+getID+"_"+doc_name+ ".mp4";
             downloadFile(file, new File(addresses));
-            dbRegistrator.register(update, addresses, 4);
+            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 4)));
             log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
@@ -140,13 +133,12 @@ public class Bot extends TelegramLongPollingBot {
 
         getFile.setFileId(animation.getFileId());
         String  getID = String.valueOf(update.getUpdateId());
-        String doc_name = update.getMessage().getCaption() == null ? "notTitle" : update.getMessage().getCaption();
 
         try {
             org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
             addresses = prefix+getID+"_"+doc_name+ ".gif";
             downloadFile(file, new File(addresses));
-            dbRegistrator.register(update, addresses, 4);
+            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 5)));
             log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
@@ -159,10 +151,6 @@ public class Bot extends TelegramLongPollingBot {
     private void returnMems(Update update){
         List<String> mems = search.search(update.getMessage().getText());
         if(mems.size() > 1){
-            List<InputMedia> mediaList = mediaCompiller.addressToMedia(mems);
-            for(InputMedia  media : mediaList){
-                System.out.println(media.getType());
-            }
         sendMedia(mediaCompiller.addressToMedia(mems));
         }
         if(mems.size() == 1){
@@ -233,5 +221,4 @@ public class Bot extends TelegramLongPollingBot {
         return botConfig.getToken();
 
     }
-
 }

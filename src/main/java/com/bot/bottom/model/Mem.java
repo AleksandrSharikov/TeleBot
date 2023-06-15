@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Document("Mems")
 public class Mem {
@@ -14,12 +15,15 @@ public class Mem {
 
     @Id
     private String name;
-    private List<String> secondWords;
+    private Set<String> secondWords;
     private int type;
     private LocalDateTime saveTime;
+    private String sender;
+    private long senderId;
 
     @PersistenceCreator
-    public Mem(String keyWord, String address, String name, List<String> secondWords, int type, LocalDateTime saveTime) {
+    public Mem(String keyWord, String address, String name, Set<String> secondWords,
+               int type, LocalDateTime saveTime, String sender, long senderId) {
        // super();
         this.keyWord = keyWord;
         this.address = address;
@@ -27,6 +31,8 @@ public class Mem {
         this.secondWords = secondWords;
         this.type = type;
         this.saveTime = saveTime;
+        this.sender = sender;
+        this.senderId = senderId;
     }
 
     public Mem(String keyWord, String address, String name) {
@@ -75,12 +81,28 @@ public class Mem {
         this.name = name;
     }
 
-    public List<String> getSecondWords() {
+    public Set<String> getSecondWords() {
         return secondWords;
     }
 
-    public void setSecondWords(List<String> secondWords) {
+    public void setSecondWords(Set<String> secondWords) {
         this.secondWords = secondWords;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public long getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(long senderId) {
+        this.senderId = senderId;
     }
 
     @Override
