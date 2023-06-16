@@ -52,6 +52,7 @@ public class DBRegistrator {
             }
             Mem mem = new Mem(keyword,address,name,secondWords,type,time, sender, senderId);
             mem = memDao.save(mem);
+        System.out.println("mem saved");
             userService.postMem(mem);
             log.info("Added to DB: " + mem);
         return mem;

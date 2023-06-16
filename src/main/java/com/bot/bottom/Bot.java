@@ -77,7 +77,7 @@ public class Bot extends TelegramLongPollingBot {
             addresses = prefix +getID+"_"+doc_name+ ".jpg";
             downloadFile(file, new File(addresses));
             sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 2)));
-            log.info("File " + addresses + "Saved");
+            log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
             log.error(e.getMessage());

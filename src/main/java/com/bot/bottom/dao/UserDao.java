@@ -9,4 +9,5 @@ public interface UserDao {
     void addSeen(long userId, List<String> seen);
     User updateUser(long id, String name);
     User findUserById(long id);
+    void deleteAll();
 }

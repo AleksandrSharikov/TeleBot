@@ -22,6 +22,7 @@ public class UserService {
     }
 
     public void postMem(Mem mem){
+        System.out.println("go to add post");
         userDao.addPosted(userId, mem.getName());
         System.out.println(userDao.findUserById(userId).getPosted().size());
     }

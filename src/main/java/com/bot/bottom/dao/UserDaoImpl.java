@@ -4,6 +4,7 @@ import com.bot.bottom.model.User;
 import com.bot.bottom.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -43,5 +44,10 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User findUserById(long id) {
         return userRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void deleteAll() {
+        userRepository.deleteAll();
     }
 }

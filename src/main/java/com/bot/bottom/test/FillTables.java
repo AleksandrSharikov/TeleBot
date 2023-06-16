@@ -1,7 +1,7 @@
 package com.bot.bottom.test;
 
 import com.bot.bottom.dao.MemDao;
-import com.bot.bottom.repository.MemRepository;
+import com.bot.bottom.dao.UserDao;
 import com.bot.bottom.model.Mem;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -10,15 +10,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class FillTables implements ApplicationRunner {
     private final MemDao memDao;
+    private final UserDao userDao;
 
-    public FillTables(MemDao memDao) {
+    public FillTables(MemDao memDao, UserDao userDao) {
         this.memDao = memDao;
 
+        this.userDao = userDao;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         memDao.deleteAll();
+        userDao.deleteAll();
       //  createTestTable();
     }
     void createTestTable() {
