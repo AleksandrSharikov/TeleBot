@@ -35,13 +35,13 @@ public class ThankYou {
         }
         cs = random.nextInt(3);
         if(cs == 0) {
-            thank.append("Пиши есчё!");
+            thank.append("Пиши исчё!");
         }
         if(cs == 1) {
             thank.append("Смешно");
         }
         if(cs == 2) {
-            thank.append("Наверное смешно. Я хз - я бот");
+            thank.append("Наверное смешно. Я не знаю - я бот");
         }
         return thank.toString();
     }
