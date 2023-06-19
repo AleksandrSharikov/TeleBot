@@ -15,16 +15,16 @@ public class UserService {
         this.userDao = userDao;
     }
 
-    public void getUserInfo(Update update){
-        name = update.getMessage().getFrom().getFirstName();
+    public void getUserInfo(Update update) {
+        name = update.getMessage().getFrom().getUserName() == null ?
+                update.getMessage().getFrom().getFirstName() :
+                update.getMessage().getFrom().getUserName();
         userId = update.getMessage().getFrom().getId();
         userDao.updateUser(userId, name);
     }
 
-    public void postMem(Mem mem){
-        System.out.println("go to add post");
+    public void postMem(Mem mem) {
         userDao.addPosted(userId, mem.getName());
-        System.out.println(userDao.findUserById(userId).getPosted().size());
     }
 
 }

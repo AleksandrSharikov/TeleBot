@@ -27,6 +27,7 @@ public class Bot extends TelegramLongPollingBot {
     private final DBRegistrator dbRegistrator;
     private final ThankYou thankYou;
     private final UserService userService;
+    private final DictionaryService dictionaryService;
     private long chatId;
     private String inText;
     private final String doc_name = "0";
@@ -35,7 +36,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private final String prefix = "./data/userDoc/";
 
-    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, ThankYou thankYou, UserService userService) {
+    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, ThankYou thankYou, UserService userService, DictionaryService dictionaryService) {
         this.botConfig = botConfig;
         this.selector = selector;
         this.mediaCompiller = mediaCompiller;
@@ -43,6 +44,7 @@ public class Bot extends TelegramLongPollingBot {
         this.dbRegistrator = dbRegistrator;
         this.thankYou = thankYou;
         this.userService = userService;
+        this.dictionaryService = dictionaryService;
     }
 
     @Override
@@ -59,9 +61,14 @@ public class Bot extends TelegramLongPollingBot {
             case 3 -> receiveVideoNote(update);
             case 4 -> receiveVideo(update);
             case 5 -> receiveAnimation(update);
+            case 11 -> dictionary(update);
             case 20 -> returnMems(update);
             case 21 -> sendMessage("Забор покрасьте!");
         }
+    }
+
+    private void dictionary(Update update) {
+        sendMessage(dictionaryService.inputWordProcessor(update));
     }
 
     private void receivedPhoto(Update update) {

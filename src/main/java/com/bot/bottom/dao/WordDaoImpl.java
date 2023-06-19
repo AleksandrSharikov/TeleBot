@@ -1,0 +1,101 @@
+package com.bot.bottom.dao;
+
+import com.bot.bottom.model.Word;
+import com.bot.bottom.repository.DictionaryRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Service
+public class WordDaoImpl implements WordDao {
+    private final DictionaryRepository dictionaryRepository;
+
+    public WordDaoImpl(DictionaryRepository dictionaryRepository) {
+        this.dictionaryRepository = dictionaryRepository;
+    }
+
+    @Override
+    public void addWord(Word word) {
+        if(dictionaryRepository.findById(word.getWord()).isPresent()){
+            if(word.getSynonyms() != null){
+                addSynonyms(word.getWord(), word.getSynonyms());
+            }
+            if(word.getWordsLike() != null){
+                addWordsLike(word.getWord(), word.getWordsLike());
+            }
+        } else {
+            dictionaryRepository.save(word);
+        }
+
+    }
+
+    @Override
+    public void addWord(String word) {
+        addWord(new Word(word, null, null));
+    }
+
+    @Override
+    public void addSynonyms(String word, Set<String> synonyms) {
+        System.out.println("add in");
+            if(dictionaryRepository.findById(word).isEmpty()){
+                dictionaryRepository.save(new Word(word,null,null));
+            }
+            dictionaryRepository.addSynonyms(word, synonyms);
+            for(String synonym : synonyms){
+                System.out.println(synonym);
+                  checkSynonym(word,synonym);
+            }
+        System.out.println("add out");
+    }
+
+    @Override
+    public void addWordsLike(String word, Set<String> wordLike) {
+            dictionaryRepository.addWordsLike(word, wordLike);
+    }
+
+    @Override
+    public String makeSynonym(String word1, String word2) {
+        StringBuilder answer = new StringBuilder();
+        if (dictionaryRepository.findById(word1).isEmpty()) {
+            dictionaryRepository.save(new Word(word1, null, null));
+        }
+        if (dictionaryRepository.findById(word1).get().getSynonyms() != null && dictionaryRepository.findById(word1).get().getSynonyms().contains(word2)){
+            return "always has been";
+        }
+            dictionaryRepository.addSynonym(word1, word2);
+           checkSynonym(word1,word2);
+           answer.append(word1);
+           answer.append(" = \n");
+           for (String syn : dictionaryRepository.findById(word1).get().getSynonyms()){
+               answer.append(syn);
+               answer.append('\n');
+           }
+           return answer.toString();
+    }
+
+    @Override
+    public void makeWordLike(String word, String wordLike) {
+
+    }
+
+    @Override
+    public Word findWord(String word) {
+        return dictionaryRepository.findById(word).orElse(null);
+    }
+
+    private void checkSynonym(String word1, String word2){
+        if (dictionaryRepository.findById(word2).isPresent()) {
+            if (dictionaryRepository.findById(word2).get().getSynonyms() == null
+                    || !dictionaryRepository.findById(word2).get().getSynonyms().contains(word1)) {
+                dictionaryRepository.addSynonym(word2, word1);
+            }
+        } else {
+            Set<String> setOfOne = new HashSet<>();
+            setOfOne.add(word2);
+            dictionaryRepository.save(new Word(word2, setOfOne, null));
+        }
+    }
+
+
+}

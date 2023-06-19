@@ -27,6 +27,9 @@ public class Selector {
             return 5;
         }
         if (update.getMessage().hasText()){
+            if (update.getMessage().getText().contains("=")){
+                return 11;
+            }
             if (update.getMessage().getText().equalsIgnoreCase("Здрасте")){
                 return 21;
             }

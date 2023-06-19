@@ -21,7 +21,7 @@ public class MemDaoImpl implements MemDao{
         memRepository.save(mem);} else {
             String name = mem.getName();
             int i = 1;
-            while(!memRepository.findById(name + "_" + i).isEmpty()){
+            while(memRepository.findById(name + "_" + i).isPresent()){
                 i++;
             }
             mem.setName(name + "_" + i);
