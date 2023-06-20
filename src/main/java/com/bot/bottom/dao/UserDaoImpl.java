@@ -4,7 +4,6 @@ import com.bot.bottom.model.User;
 import com.bot.bottom.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -28,6 +27,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User updateUser(long id, String name) {
+        String oldName;
         User user = userRepository.findById(id).orElse(null);
         if(user == null){
             user = new User( id, name);
@@ -37,7 +37,8 @@ public class UserDaoImpl implements UserDao {
         if (user.getName().equals(name)) {
             return user;
         }
-        userRepository.changeName(id, name);
+        oldName = user.getName();                               // work but is not smooth.
+        userRepository.changeName(id, oldName, name);           // Should be redone for one function in repository
         return userRepository.findById(id).orElse(null);
     }
 

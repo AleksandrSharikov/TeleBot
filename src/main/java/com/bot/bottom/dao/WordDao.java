@@ -13,5 +13,6 @@ public interface WordDao {
     String makeSynonym(String word1, String word2);
     void makeWordLike(String word, String wordLike);
     Word findWord(String word);
+    Set<String> findSynonyms(String word);
 
 }

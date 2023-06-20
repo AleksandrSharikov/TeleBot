@@ -31,6 +31,11 @@ public class MemDaoImpl implements MemDao{
     }
 
     @Override
+    public void setKeyWord(String name, String keyWord) {
+        memRepository.setKeyword(name,keyWord);
+    }
+
+    @Override
     public List<Mem> findAll() {
         return memRepository.findAll();
     }
@@ -42,7 +47,19 @@ public class MemDaoImpl implements MemDao{
 
     @Override
     public List<Mem> findByKeyword(String keyword) {
+        System.out.println("Looking for " + keyword);
+        System.out.println("found " + memRepository.getAllAddresses(keyword).size() + " results");
         return memRepository.getAllAddresses(keyword);
+    }
+
+    @Override
+    public List<Mem> findBySecondWord(String word) {
+        return memRepository.getAllAddressesBySecondWords(word);
+    }
+
+    @Override
+    public void delete(Mem mem) {
+        memRepository.delete(mem);
     }
 
     @Override

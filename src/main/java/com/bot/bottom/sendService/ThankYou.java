@@ -1,4 +1,4 @@
-package com.bot.bottom.service;
+package com.bot.bottom.sendService;
 
 import com.bot.bottom.model.Mem;
 import org.springframework.stereotype.Service;

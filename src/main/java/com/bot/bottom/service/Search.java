@@ -12,9 +12,11 @@ import java.util.List;
 @Service
 public class Search {
     private final MemDao memDao;
+    private final DictionaryService dictionaryService;
 
-    public Search(MemDao memDao) {
+    public Search(MemDao memDao, DictionaryService dictionaryService) {
         this.memDao = memDao;
+        this.dictionaryService = dictionaryService;
     }
 
     public List<String> search(String toFind){
@@ -30,7 +32,19 @@ public class Search {
                 answer.add(memDao.findByName(toFind).get().getAddress());
             }
             if (!memDao.findByKeyword(toFind).isEmpty()){
-                memDao.findByKeyword(toFind).stream().limit(8).map(Mem::getAddress)
+                memDao.findByKeyword(toFind).stream().limit(9).map(Mem::getAddress)
+                        .forEach(answer::add);
+            }
+            if (9 - answer.size() > 1 && dictionaryService.findSynonyms(toFind) != null){
+                for(String synonym : dictionaryService.findSynonyms(toFind)){
+                    if (!memDao.findByKeyword(synonym).isEmpty()){
+                        memDao.findByKeyword(synonym).stream().limit(9).map(Mem::getAddress)
+                                .forEach(answer::add);
+                    }
+                }
+            }
+            if (9 - answer.size() > 1 && !memDao.findBySecondWord(toFind).isEmpty()){
+                memDao.findBySecondWord(toFind).stream().limit(9 - answer.size()).map(Mem::getAddress)
                         .forEach(answer::add);
             }
         }

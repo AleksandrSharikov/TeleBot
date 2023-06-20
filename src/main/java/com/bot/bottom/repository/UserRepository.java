@@ -9,12 +9,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends MongoRepository<User, Long> {
 
-   // @Update(value = "{userId: ?0} $push {posted: ?1}")
     @Query("{ 'userId' : ?0 }")
     @Update("{ '$push' : { 'posted' : ?1 } }")
     void updateUserPostedById(long id, String posted);
 
-    @Query(value = "{userId: ?0 }")
-    @Update("{ '$push' : {oldNames:  $name}, '$set' : {'name' : ?1 } }")
+    @Query("{userId: ?0 }")
+    @Update("{ '$push' : {'oldNames' :  $name}, '$set' : {'name' : ?1 } }")
     void changeName(long id, String newName);
+
+    @Query("{userId: ?0 }")
+    @Update("{ '$push' : {'oldNames' : ?1}, '$set' : {'name' : ?2 } }")
+    void changeName(long id, String oldName, String newName);
 }

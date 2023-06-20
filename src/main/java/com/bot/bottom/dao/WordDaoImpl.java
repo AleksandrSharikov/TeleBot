@@ -84,6 +84,14 @@ public class WordDaoImpl implements WordDao {
         return dictionaryRepository.findById(word).orElse(null);
     }
 
+    @Override
+    public Set<String> findSynonyms(String word) {
+        if(dictionaryRepository.findById(word).isPresent()){
+            return dictionaryRepository.findById(word).get().getSynonyms();
+        }
+        return null;
+    }
+
     private void checkSynonym(String word1, String word2){
         if (dictionaryRepository.findById(word2).isPresent()) {
             if (dictionaryRepository.findById(word2).get().getSynonyms() == null

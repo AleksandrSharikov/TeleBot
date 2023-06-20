@@ -20,7 +20,7 @@ public class FillTables implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        memDao.deleteAll();
+         memDao.deleteAll();
       //  userDao.deleteAll();
       //  createTestTable();
     }

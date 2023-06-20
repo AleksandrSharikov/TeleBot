@@ -25,6 +25,10 @@ public class DictionaryService {
         return answer;
     }
 
+    public Set<String> findSynonyms(String word){
+     return wordDao.findSynonyms(word);
+    }
+
     private String newSynonyms(String message){
         System.out.println(message);
         StringBuilder answer;

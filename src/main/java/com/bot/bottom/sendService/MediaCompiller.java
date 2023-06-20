@@ -1,12 +1,9 @@
-package com.bot.bottom.service;
+package com.bot.bottom.sendService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaDocument;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
+import org.telegram.telegrambots.meta.api.objects.media.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,11 +13,11 @@ import java.util.List;
 @Service
 public class MediaCompiller {
 
+    private InputMedia media;
+    private String extension;
+    private String name;
     public List<InputMedia> addressToMedia(List<String> addresses){
         List<InputMedia> medias = new ArrayList<>();
-        InputMedia media;
-        String extension;
-        String name;
         log.info("addresses contains " + addresses.size() + " records");
         for(String address : addresses){
             extension = FilenameUtils.getExtension(address);
@@ -28,6 +25,7 @@ public class MediaCompiller {
             media = switch (extension) {
                 case "jpg" -> new InputMediaPhoto();
                 case "mp4" -> new InputMediaVideo();
+            //    case "gif" -> new InputMediaAnimation();
                 default -> new InputMediaDocument();
             };
                 media.setMedia(new File(address), name);
@@ -36,4 +34,18 @@ public class MediaCompiller {
         log.info("media contains " + medias.size() + " records");
         return medias;
     }
+
+    public InputMedia addressToMedia(String address){
+        extension = FilenameUtils.getExtension(address);
+        name = FilenameUtils.getName(address);
+        media = switch (extension) {
+            case "jpg" -> new InputMediaPhoto();
+            case "mp4" -> new InputMediaVideo();
+            //    case "gif" -> new InputMediaAnimation();
+            default -> new InputMediaDocument();
+        };
+        media.setMedia(new File(address), name);
+        return media;
+    }
+
 }
