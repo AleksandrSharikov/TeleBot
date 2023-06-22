@@ -1,18 +1,20 @@
-package com.bot.bottom.sendService;
+package com.bot.bottom.compillers;
 
 import com.bot.bottom.model.Mem;
 import com.bot.bottom.service.DictionaryService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Service
-public class ThankYou {
+public class MessageCompiller {
 
     private final Random random = new Random();
     private final DictionaryService dictionaryService;
 
-    public ThankYou(DictionaryService dictionaryService) {
+    public MessageCompiller(DictionaryService dictionaryService) {
         this.dictionaryService = dictionaryService;
     }
 
@@ -63,16 +65,7 @@ public class ThankYou {
         label.append('\n');
         label.append("Key word : ");
         label.append(mem.getKeyWord());
-        label.append(" = (");
-        for(String s : dictionaryService.findSynonyms(mem.getKeyWord())){
-            if(!flagFirst){
-                flagFirst = true;
-            } else {
-                label.append(", ");}
-        label.append(s);
-        }
-        label.append(')');
-        label.append('\n');
+        addSynonyms(label, mem.getKeyWord());
         label.append("Other associations : ");
         for (String sw : mem.getSecondWords()) {
             if(!flagFirst){
@@ -91,6 +84,41 @@ public class ThankYou {
         label.append('\n');
 
         return label.toString();
+    }
+    
+    public String makeMap(Map<String, List<String>> map){
+        StringBuilder answer = new StringBuilder();
+        int count = 0;
+        for(Map.Entry<String,List<String>> entry : map.entrySet()){
+            answer.append(entry.getKey());
+            addSynonyms(answer, entry.getKey());
+            for(String name : entry.getValue()){
+                answer.append("          ");
+                answer.append(name);
+                answer.append('\n');
+                count++;
+            }
+
+        }
+        answer.append("Total amount of names: ");
+        answer.append(count);
+        return answer.toString();
+    }
+    private void addSynonyms(StringBuilder sb, String word){
+        if(dictionaryService.findSynonyms(word) != null) {
+            boolean flagFirst = false;
+            sb.append(" = (");
+            for (String s : dictionaryService.findSynonyms(word)) {
+                if (!flagFirst) {
+                    flagFirst = true;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(s);
+            }
+            sb.append(')');
+        }
+        sb.append('\n');
     }
 
 }

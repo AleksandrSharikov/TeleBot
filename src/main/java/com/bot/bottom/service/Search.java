@@ -1,7 +1,7 @@
 package com.bot.bottom.service;
 
+import com.bot.bottom.compillers.MessageCompiller;
 import com.bot.bottom.dao.MemDao;
-import com.bot.bottom.dto.MemDTO;
 import com.bot.bottom.model.Mem;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,12 @@ import java.util.Map;
 public class Search {
     private final MemDao memDao;
     private final DictionaryService dictionaryService;
+    private final MessageCompiller messageCompiller;
 
-    public Search(MemDao memDao, DictionaryService dictionaryService) {
+    public Search(MemDao memDao, DictionaryService dictionaryService, MessageCompiller messageCompiller) {
         this.memDao = memDao;
         this.dictionaryService = dictionaryService;
+        this.messageCompiller = messageCompiller;
     }
 
     public Mem findMemByAddress(String address){
@@ -66,18 +68,38 @@ public class Search {
         return answer;
     }
 
-    public MemDTO compileMap() {
+    public String printMap(){
+        return messageCompiller.makeMap(compileMap());
+    }
+
+    private Map<String,List<String>> compileMap() {
         List<Mem> allMems = memDao.findAll();
         Map<String, List<String>>  wordName = new HashMap<>();
+        List<String> listOfOne;
+        boolean foundFlag;
         String name;
         String keyWord;
         for(Mem mem : allMems) {
             name = mem.getName();
             keyWord = mem.getKeyWord();
-            if(wordName.keySet().contains(mem.getKeyWord())){
-                wordName.merge(keyWord, word, (list,word) -> list.add(mem.getKeyWord()));
+            foundFlag = false;
+            if(wordName.containsKey(keyWord)){
+                wordName.get(keyWord).add(name);
+                foundFlag = true;
+            } else if(dictionaryService.findSynonyms(keyWord) != null) {
+                for(String synonym : dictionaryService.findSynonyms(keyWord)){
+                    if(!foundFlag && wordName.containsKey(synonym)){
+                        wordName.get(synonym).add(name);
+                        foundFlag = true;
+                    }
+                }
             }
-
+            if (!foundFlag){
+                listOfOne = new ArrayList<>();
+                listOfOne.add(name);
+                wordName.put(keyWord, listOfOne);
+            }
         }
+        return wordName;
     }
 }

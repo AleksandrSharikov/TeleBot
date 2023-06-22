@@ -2,7 +2,6 @@ package com.bot.bottom.dao;
 
 import com.bot.bottom.model.Mem;
 import com.bot.bottom.repository.MemRepository;
-import com.mongodb.client.MongoCollection;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,11 +51,7 @@ public class MemDaoImpl implements MemDao{
     }
 
     @Override
-    public List<Mem> findByKeyword(String keyword) {
-        System.out.println("Looking for " + keyword);
-        System.out.println("found " + memRepository.getAllAddresses(keyword).size() + " results");
-        return memRepository.getAllAddresses(keyword);
-    }
+    public List<Mem> findByKeyword(String keyword) { return memRepository.getAllAddresses(keyword); }
 
     @Override
     public List<Mem> findBySecondWord(String word) {

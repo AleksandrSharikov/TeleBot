@@ -1,6 +1,5 @@
 package com.bot.bottom.dao;
 
-import com.bot.bottom.model.Mem;
 import com.bot.bottom.model.Word;
 
 import java.util.List;
@@ -18,5 +17,6 @@ public interface WordDao {
     void makeWordLike(String word, String wordLike);
     Word findWord(String word);
     Set<String> findSynonyms(String word);
+    void deleteAll();
 
 }

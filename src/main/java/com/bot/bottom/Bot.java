@@ -4,8 +4,8 @@ import com.bot.bottom.config.BotConfig;
 import com.bot.bottom.dto.MemDTO;
 import com.bot.bottom.receiveService.DBRegistrator;
 import com.bot.bottom.receiveService.Selector;
-import com.bot.bottom.sendService.MediaCompiller;
-import com.bot.bottom.sendService.ThankYou;
+import com.bot.bottom.compillers.MediaCompiller;
+import com.bot.bottom.compillers.MessageCompiller;
 import com.bot.bottom.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -29,7 +29,7 @@ public class Bot extends TelegramLongPollingBot {
     private final MediaCompiller mediaCompiller;
     private final Search search;
     private final DBRegistrator dbRegistrator;
-    private final ThankYou thankYou;
+    private final MessageCompiller thankYou;
     private final UserService userService;
     private final DictionaryService dictionaryService;
     private final FileService fileService;
@@ -39,7 +39,7 @@ public class Bot extends TelegramLongPollingBot {
     private String addresses;
     private final String prefix = "./data/photoBase/";
 
-    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, ThankYou thankYou, UserService userService, DictionaryService dictionaryService, FileService fileService, ExportImportDatabase exportImportDatabase) {
+    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, MessageCompiller thankYou, UserService userService, DictionaryService dictionaryService, FileService fileService, ExportImportDatabase exportImportDatabase) {
         this.botConfig = botConfig;
         this.selector = selector;
         this.mediaCompiller = mediaCompiller;
@@ -221,7 +221,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void returnMap(Update update) {
-        sendMessage(search.compileMap());
+        sendMessage(search.printMap());
     }
 
     private void sendOne(String address) {

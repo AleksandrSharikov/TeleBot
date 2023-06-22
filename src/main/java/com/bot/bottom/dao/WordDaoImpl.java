@@ -101,6 +101,9 @@ public class WordDaoImpl implements WordDao {
         return null;
     }
 
+    @Override
+    public void deleteAll() { dictionaryRepository.deleteAll(); }
+
     private void checkSynonym(String word, String synonym){
         if (dictionaryRepository.findById(synonym).isPresent()) {
             if (dictionaryRepository.findById(synonym).get().getSynonyms() == null
