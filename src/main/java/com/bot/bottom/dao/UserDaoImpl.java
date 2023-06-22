@@ -16,6 +16,16 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
+    public void importDB(List<User> db) {
+        userRepository.saveAll(db);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
     public void addPosted(long userId, String post) {
         userRepository.updateUserPostedById(userId, post);
     }

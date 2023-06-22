@@ -5,6 +5,7 @@ import com.bot.bottom.repository.DictionaryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -13,6 +14,16 @@ public class WordDaoImpl implements WordDao {
 
     public WordDaoImpl(DictionaryRepository dictionaryRepository) {
         this.dictionaryRepository = dictionaryRepository;
+    }
+
+    @Override
+    public void importDB(List<Word> db) {
+        dictionaryRepository.saveAll(db);
+    }
+
+    @Override
+    public List<Word> findAll() {
+        return dictionaryRepository.findAll();
     }
 
     @Override
@@ -37,16 +48,13 @@ public class WordDaoImpl implements WordDao {
 
     @Override
     public void addSynonyms(String word, Set<String> synonyms) {
-        System.out.println("add in");
             if(dictionaryRepository.findById(word).isEmpty()){
                 dictionaryRepository.save(new Word(word,null,null));
             }
             dictionaryRepository.addSynonyms(word, synonyms);
             for(String synonym : synonyms){
-                System.out.println(synonym);
                   checkSynonym(word,synonym);
             }
-        System.out.println("add out");
     }
 
     @Override
@@ -55,19 +63,20 @@ public class WordDaoImpl implements WordDao {
     }
 
     @Override
-    public String makeSynonym(String word1, String word2) {
+    public String makeSynonym(String word, String synonym) {
         StringBuilder answer = new StringBuilder();
-        if (dictionaryRepository.findById(word1).isEmpty()) {
-            dictionaryRepository.save(new Word(word1, null, null));
+        if (dictionaryRepository.findById(word).isEmpty()) {
+            dictionaryRepository.save(new Word(word, null, null));
         }
-        if (dictionaryRepository.findById(word1).get().getSynonyms() != null && dictionaryRepository.findById(word1).get().getSynonyms().contains(word2)){
+        if (dictionaryRepository.findById(word).get().getSynonyms() != null 
+                && dictionaryRepository.findById(word).get().getSynonyms().contains(synonym)){
             return "always has been";
         }
-            dictionaryRepository.addSynonym(word1, word2);
-           checkSynonym(word1,word2);
-           answer.append(word1);
+            dictionaryRepository.addSynonym(word, synonym);
+           checkSynonym(word,synonym);
+           answer.append(word);
            answer.append(" = \n");
-           for (String syn : dictionaryRepository.findById(word1).get().getSynonyms()){
+           for (String syn : dictionaryRepository.findById(word).get().getSynonyms()){
                answer.append(syn);
                answer.append('\n');
            }
@@ -92,16 +101,16 @@ public class WordDaoImpl implements WordDao {
         return null;
     }
 
-    private void checkSynonym(String word1, String word2){
-        if (dictionaryRepository.findById(word2).isPresent()) {
-            if (dictionaryRepository.findById(word2).get().getSynonyms() == null
-                    || !dictionaryRepository.findById(word2).get().getSynonyms().contains(word1)) {
-                dictionaryRepository.addSynonym(word2, word1);
+    private void checkSynonym(String word, String synonym){
+        if (dictionaryRepository.findById(synonym).isPresent()) {
+            if (dictionaryRepository.findById(synonym).get().getSynonyms() == null
+                    || !dictionaryRepository.findById(synonym).get().getSynonyms().contains(word)) {
+                dictionaryRepository.addSynonym(synonym, word);
             }
         } else {
             Set<String> setOfOne = new HashSet<>();
-            setOfOne.add(word2);
-            dictionaryRepository.save(new Word(word2, setOfOne, null));
+            setOfOne.add(word);
+            dictionaryRepository.save(new Word(synonym, setOfOne, null));
         }
     }
 

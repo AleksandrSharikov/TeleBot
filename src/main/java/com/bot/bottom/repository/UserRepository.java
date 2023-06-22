@@ -20,4 +20,6 @@ public interface UserRepository extends MongoRepository<User, Long> {
     @Query("{userId: ?0 }")
     @Update("{ '$push' : {'oldNames' : ?1}, '$set' : {'name' : ?2 } }")
     void changeName(long id, String oldName, String newName);
+
+
 }

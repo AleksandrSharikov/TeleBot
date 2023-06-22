@@ -12,10 +12,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
@@ -36,12 +33,13 @@ public class Bot extends TelegramLongPollingBot {
     private final UserService userService;
     private final DictionaryService dictionaryService;
     private final FileService fileService;
+    private final ExportImportDatabase exportImportDatabase;
     private long chatId;
     private final String doc_name = "0";
     private String addresses;
-    private final String prefix = "./data/userDoc/";
+    private final String prefix = "./data/photoBase/";
 
-    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, ThankYou thankYou, UserService userService, DictionaryService dictionaryService, FileService fileService) {
+    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, ThankYou thankYou, UserService userService, DictionaryService dictionaryService, FileService fileService, ExportImportDatabase exportImportDatabase) {
         this.botConfig = botConfig;
         this.selector = selector;
         this.mediaCompiller = mediaCompiller;
@@ -51,6 +49,7 @@ public class Bot extends TelegramLongPollingBot {
         this.userService = userService;
         this.dictionaryService = dictionaryService;
         this.fileService = fileService;
+        this.exportImportDatabase = exportImportDatabase;
     }
 
     @Override
@@ -73,8 +72,13 @@ public class Bot extends TelegramLongPollingBot {
             case 16 -> deleteFile(update);
             case 20 -> returnMems(update);
             case 21 -> sendMessage("Забор покрасьте!");
+            case 30 -> receiveDB(update);
+            case 35 -> sendDB(update);
+            case 37 -> returnMap(update);
         }
     }
+
+
 
 
     private void dictionary(Update update) {
@@ -103,7 +107,6 @@ public class Bot extends TelegramLongPollingBot {
 
     private void receiveVideoNote(Update update) {
         log.info("File received by video note processor");
-        //  List<PhotoSize> photoList = update.getMessage().getPhoto();
         VideoNote videoNote = update.getMessage().getVideoNote();
         GetFile getFile = new GetFile();
 
@@ -142,6 +145,44 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    private void receiveDB(Update update) {
+        Document document = update.getMessage().getDocument();
+        GetFile getFile = new GetFile();
+
+        getFile.setFileId(document.getFileId());
+        String baseName = update.getMessage().getDocument().getFileName().toLowerCase();
+
+        try {
+            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
+            addresses = prefix + baseName;
+            downloadFile(file, new File(addresses));
+            sendMessage("File has been gotten");
+            sendMessage(exportImportDatabase.importBase(addresses));
+            log.info("File " + addresses + " Saved");
+        } catch (TelegramApiException e) {
+            log.error("TelegramApiException thrown by receivePhoto");
+            log.error(e.getMessage());
+        }
+    }
+
+    private void sendDB(Update update) {
+        List<String> addressList = exportImportDatabase.exportBD();
+       // String address = addressList.get(0);
+        for(String address : addressList) {
+            try {
+                SendDocument sendDocument = new SendDocument();
+                sendDocument.setChatId(chatId);
+                sendDocument.setDocument(new InputFile(new File(address)));
+                // sendDocument.setCaption(caption);
+                execute(sendDocument);
+            } catch (TelegramApiException e) {
+                log.error("TelegramApiException thrown by sendDB");
+                log.error(e.getMessage());
+            }
+        }
+    }
+
+
     private void receiveAnimation(Update update) {
         log.info("File received by video processor");
         Animation animation = update.getMessage().getAnimation();
@@ -168,23 +209,31 @@ public class Bot extends TelegramLongPollingBot {
             sendMedia(mediaCompiller.addressToMedia(mems));
         }
         if (mems.size() == 1) {
-            sendOne(mems.get(0));
+            String caption = null;
+            if (update.getMessage().getText().matches("^name/.*")) {
+                caption = thankYou.makeLabel(search.findMemByAddress(mems.get(0)));
+            }
+            sendOne(mems.get(0), caption);
         }
         if (mems.isEmpty()) {
             sendMessage("nothing has been found");
         }
     }
 
+    private void returnMap(Update update) {
+        sendMessage(search.compileMap());
+    }
+
     private void sendOne(String address) {
         sendOne(address, null);
     }
 
-    private void sendOne(String address, String caprion) {                  // bad style hardcode chatId. change!
+    private void sendOne(String address, String caption) {                  // bad style hardcode chatId. change!
         String extension = FilenameUtils.getExtension(address);
         if (extension.equals("jpg")) {
-            sendPhoto(chatId, address, caprion);
+            sendPhoto(chatId, address, caption);
         } else if (extension.equals("mp4")) {
-            sendVideo(chatId, address, caprion);
+            sendVideo(chatId, address, caption);
         } else {
             sendMessage("error in sendOne");
         }

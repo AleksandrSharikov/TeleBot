@@ -43,7 +43,6 @@ public class DictionaryService {
                     .map(String::toLowerCase).map(String::trim).collect(Collectors.toSet());
             wordDao.addSynonyms(words[0].toLowerCase().trim(), synonyms);
         } else {
-            System.out.println("in else");
             return "added " + wordDao.makeSynonym(words[0].trim().toLowerCase(), words[1].trim().toLowerCase());
         }
         answer = new StringBuilder();

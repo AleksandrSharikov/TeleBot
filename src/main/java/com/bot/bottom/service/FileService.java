@@ -48,7 +48,7 @@ public class FileService {
         return "Deleting canceled";
     }
 
-    private boolean removeFile(String address){
+    public boolean removeFile(String address){
         File file = new File(address);
             return file.delete();
     }

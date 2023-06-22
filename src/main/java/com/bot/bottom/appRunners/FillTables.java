@@ -1,4 +1,4 @@
-package com.bot.bottom.test;
+package com.bot.bottom.appRunners;
 
 import com.bot.bottom.dao.MemDao;
 import com.bot.bottom.dao.UserDao;
@@ -20,7 +20,7 @@ public class FillTables implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-         memDao.deleteAll();
+        // memDao.deleteAll();
       //  userDao.deleteAll();
       //  createTestTable();
     }

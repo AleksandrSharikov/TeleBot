@@ -2,6 +2,7 @@ package com.bot.bottom.dao;
 
 import com.bot.bottom.model.Mem;
 import com.bot.bottom.repository.MemRepository;
+import com.mongodb.client.MongoCollection;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +32,11 @@ public class MemDaoImpl implements MemDao{
     }
 
     @Override
+    public void importDB(List<Mem> db) {
+        memRepository.saveAll(db);
+    }
+
+    @Override
     public void setKeyWord(String name, String keyWord) {
         memRepository.setKeyword(name,keyWord);
     }
@@ -55,6 +61,11 @@ public class MemDaoImpl implements MemDao{
     @Override
     public List<Mem> findBySecondWord(String word) {
         return memRepository.getAllAddressesBySecondWords(word);
+    }
+
+    @Override
+    public Mem findDyAddress(String address) {
+        return memRepository.findMemByAddress(address);
     }
 
     @Override

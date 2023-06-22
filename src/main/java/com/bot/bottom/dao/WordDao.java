@@ -1,10 +1,14 @@
 package com.bot.bottom.dao;
 
+import com.bot.bottom.model.Mem;
 import com.bot.bottom.model.Word;
 
+import java.util.List;
 import java.util.Set;
 
 public interface WordDao {
+    void importDB(List<Word> db);
+    List<Word> findAll();
     void addWord(Word word);
     void addWord(String word);
     void addSynonyms(String word, Set<String> synonym);

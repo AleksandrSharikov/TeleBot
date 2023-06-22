@@ -32,6 +32,10 @@ public class Selector {
             log.info("Selector detect animation and set 5");
             return 5;
         }
+        if (update.getMessage().hasDocument() && update.getMessage().getDocument().getMimeType().equals("application/json")){
+            log.info("Selector detect JSON and set 30");
+            return 30;
+        }
         if (update.getMessage().hasText()) {
             if (update.getMessage().getText().contains("=")) {
                 return 11;
@@ -42,10 +46,18 @@ public class Selector {
             if (update.getMessage().getText().contains("Delete/")) {
                 return 15;
             }
-            // 16 returns in the top
+                        // 16 returns in the top
             if (update.getMessage().getText().equalsIgnoreCase("Здрасте")) {
                 return 21;
             }
+                        // 30 receive DB
+            if (update.getMessage().getText().equalsIgnoreCase("/ExportDB/")) {
+                return 35;
+            }
+            if (update.getMessage().getText().equalsIgnoreCase("/returnMap/")){
+                return 37;
+            }
+
             return 20;
         }
         return 0;
