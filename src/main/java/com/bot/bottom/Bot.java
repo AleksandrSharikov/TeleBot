@@ -86,9 +86,9 @@ public class Bot extends TelegramLongPollingBot {
 
 
 
-    private void dictionary(Update update) {
-        sendMessage(dictionaryService.inputWordProcessor(update));
-    }
+
+
+// 2 receive photo_________________________________________________________
 
     private void receivedPhoto(Update update) {
         log.info("File received by photo processor");
@@ -110,6 +110,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+//  3 receive video note________________________________________
     private void receiveVideoNote(Update update) {
         log.info("File received by video note processor");
         VideoNote videoNote = update.getMessage().getVideoNote();
@@ -129,6 +130,8 @@ public class Bot extends TelegramLongPollingBot {
             log.error(e.getMessage());
         }
     }
+
+    // 4 receive video________________________________________________________
 
     private void receiveVideo(Update update) {
         log.info("File received by video processor");
@@ -150,43 +153,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void receiveDB(Update update) {
-        Document document = update.getMessage().getDocument();
-        GetFile getFile = new GetFile();
-
-        getFile.setFileId(document.getFileId());
-        String baseName = update.getMessage().getDocument().getFileName().toLowerCase();
-
-        try {
-            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            addresses = prefix + baseName;
-            downloadFile(file, new File(addresses));
-            sendMessage("File has been gotten");
-            sendMessage(exportImportDatabase.importBase(addresses));
-            log.info("File " + addresses + " Saved");
-        } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown by receivePhoto");
-            log.error(e.getMessage());
-        }
-    }
-
-    private void sendDB(Update update) {
-        List<String> addressList = exportImportDatabase.exportBD();
-       // String address = addressList.get(0);
-        for(String address : addressList) {
-            try {
-                SendDocument sendDocument = new SendDocument();
-                sendDocument.setChatId(chatId);
-                sendDocument.setDocument(new InputFile(new File(address)));
-                // sendDocument.setCaption(caption);
-                execute(sendDocument);
-            } catch (TelegramApiException e) {
-                log.error("TelegramApiException thrown by sendDB");
-                log.error(e.getMessage());
-            }
-        }
-    }
-
+    // 5 receive animation_______________________________________________________________
 
     private void receiveAnimation(Update update) {
         log.info("File received by video processor");
@@ -208,6 +175,27 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    // 11 Working with dictionary_______________________________________________________
+    private void dictionary(Update update) {
+        sendMessage(dictionaryService.inputWordProcessor(update));
+    }
+
+    // 12 change keyWord________________________________________________________________
+
+    private void changeKeyword(Update update) {
+        sendMessage(dbRegistrator.changeKeyWord(update));
+    }
+
+    // 15 ask delete file _______________________________________________________
+    private void askDeleteFile(Update update) {
+        sendMessage(fileService.askDeleteFile(update));
+    }
+    // 16 delete file_____________________________________________________________
+    private void deleteFile(Update update) {
+        sendMessage(fileService.deleteFile(update));
+    }
+
+    // 20 return mems _______________________________________________________________
     private void returnMems(Update update) {
         List<String> mems = search.search(update.getMessage().getText());
         if (mems.size() > 1) {
@@ -225,18 +213,69 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void returnMap(Update update) {
-        sendMessage(search.printMap());
+    //30 receive DB____________________________________________________________
+
+    private void receiveDB(Update update) {
+        Document document = update.getMessage().getDocument();
+        GetFile getFile = new GetFile();
+
+        getFile.setFileId(document.getFileId());
+        String baseName = update.getMessage().getDocument().getFileName().toLowerCase();
+
+        try {
+            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
+            addresses = prefix + baseName;
+            downloadFile(file, new File(addresses));
+            sendMessage("File has been gotten");
+            sendMessage(exportImportDatabase.importBase(addresses));
+            log.info("File " + addresses + " Saved");
+        } catch (TelegramApiException e) {
+            log.error("TelegramApiException thrown by receivePhoto");
+            log.error(e.getMessage());
+        }
     }
+
+    // 35 Export DB______________________________________________
+
+    private void sendDB(Update update) {
+        List<String> addressList = exportImportDatabase.exportBD();
+        for(String address : addressList) {
+            try {
+                SendDocument sendDocument = new SendDocument();
+                sendDocument.setChatId(chatId);
+                sendDocument.setDocument(new InputFile(new File(address)));
+                // sendDocument.setCaption(caption);
+                execute(sendDocument);
+            } catch (TelegramApiException e) {
+                log.error("TelegramApiException thrown by sendDB");
+                log.error(e.getMessage());
+            }
+        }
+    }
+    // 37 Return map____________________________________________________________________
+    private void returnMap(Update update) { sendMessage(search.printMap());  }
+    // 38 Send file list__________________________________________________________________
+    private void photoFiles(Update update) {
+        sendMessage(messageCompiller.setPhotoToString(fileService.photoList(prefix),prefix));
+    }
+    // 39 Ask cleat files___________________________________________________________________________
+    private void askClearFiles(Update update){
+        sendMessage(fileService.askClearFiles(update));
+    }
+
+    // 40 Clear files__________________________________________________________________________
+    private void clearFiles(Update update){
+        sendMessage(fileService.clearFile(update, prefix));
+    }
+
+
+
+
+// Send One media___________________________________________________________________________________
 
     private void sendOne(String address) {
         sendOne(address, null);
     }
-
-    private void photoFiles(Update update) {
-        sendMessage(messageCompiller.setPhotoToString(fileService.photoList(prefix),prefix));
-    }
-
     private void sendOne(String address, String caption) {                  // bad style hardcode chatId. change!
         String extension = FilenameUtils.getExtension(address);
         if (extension.equals("jpg")) {
@@ -247,7 +286,23 @@ public class Bot extends TelegramLongPollingBot {
             sendMessage("error in sendOne");
         }
     }
-    private void game() { }
+
+    // Send several media________________________________________________________________________
+    private void sendMedia(List<InputMedia> media) {
+        SendMediaGroup sendMediaGroup = new SendMediaGroup();
+        sendMediaGroup.setChatId(chatId);
+        sendMediaGroup.setMedias(media);
+        try {
+            execute(sendMediaGroup);
+        } catch (TelegramApiException e) {
+            log.error("TelegramApiException thrown by sendMedia");
+            log.error(e.getMessage());
+        }
+    }
+
+
+
+    // Send message_________________________________________________________________________
     private void sendMessage(MemDTO memDTO) {
         if (memDTO.mem() == null) {
             sendMessage(memDTO.comment());
@@ -255,7 +310,6 @@ public class Bot extends TelegramLongPollingBot {
             sendOne(memDTO.mem().getAddress(), memDTO.comment());
         }
     }
-
     private void sendMessage(String textToSend) {
         sendMessage(chatId, textToSend);
     }
@@ -272,17 +326,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendMedia(List<InputMedia> media) {
-        SendMediaGroup sendMediaGroup = new SendMediaGroup();
-        sendMediaGroup.setChatId(chatId);
-        sendMediaGroup.setMedias(media);
-        try {
-            execute(sendMediaGroup);
-        } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown by sendMedia");
-            log.error(e.getMessage());
-        }
-    }
+// Send photo or Video _____________________________________________________________________
 
     private void sendPhoto(String address) {
         sendPhoto(chatId, address);
@@ -326,27 +370,15 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void askDeleteFile(Update update) {
-        sendMessage(fileService.askDeleteFile(update));
-    }
-    private void askClearFiles(Update update){
-        sendMessage(fileService.askClearFiles(update));
-    }
-
-    private void deleteFile(Update update) {
-        sendMessage(fileService.deleteFile(update));
-    }
-    private void clearFiles(Update update){
-        sendMessage(fileService.clearFile(update, prefix));
-    }
-
-    private void changeKeyword(Update update) {
-        sendMessage(dbRegistrator.changeKeyWord(update));
-    }
 
 
+    private void game() { }
+
+    // Technical ________________________________________________________________________
     @Override
     public String getBotUsername() { return botConfig.getBotName(); }
     @Override
     public String getBotToken() { return botConfig.getToken();}
+
+
 }
