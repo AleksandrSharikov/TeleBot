@@ -1,5 +1,6 @@
 package com.bot.bottom.compillers;
 
+import com.bot.bottom.dao.MemDao;
 import com.bot.bottom.model.Mem;
 import com.bot.bottom.service.DictionaryService;
 import org.springframework.stereotype.Service;
@@ -7,15 +8,18 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 @Service
 public class MessageCompiller {
 
     private final Random random = new Random();
     private final DictionaryService dictionaryService;
+    private final MemDao memDao;
 
-    public MessageCompiller(DictionaryService dictionaryService) {
+    public MessageCompiller(DictionaryService dictionaryService, MemDao memDao) {
         this.dictionaryService = dictionaryService;
+        this.memDao = memDao;
     }
 
 
@@ -55,6 +59,22 @@ public class MessageCompiller {
             thank.append("Наверное смешно. Я не знаю - я бот");
         }
         return thank.toString();
+    }
+
+    public String setPhotoToString(Set<String> files, String prefix){
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for(String s : files){
+            sb.append(s);
+            sb.append(" -> ");
+            sb.append(memDao.findDyAddress(prefix + s) == null
+                    ? "not in the base" : memDao.findDyAddress(prefix + s).getName());
+            sb.append('\n');
+            count++;
+        }
+        sb.append("Total amount of files: ");
+        sb.append(count);
+        return sb.toString();
     }
 
     public String makeLabel(Mem mem){

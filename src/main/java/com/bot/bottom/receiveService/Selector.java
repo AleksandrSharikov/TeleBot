@@ -9,12 +9,17 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class Selector {
 
     private long deleteFlag;
+    private long clearFlag;
+    private long baseResetFlag;
 
     public int select(Update update) {
         log.info("Selector get message " + update);
 
         if (deleteFlag == update.getMessage().getChatId()) {
             return 16;
+        }
+        if (clearFlag == update.getMessage().getChatId()){
+            return 40;
         }
         if (update.getMessage().hasPhoto()) {
             log.info("Selector detect photo and set 2");
@@ -57,18 +62,26 @@ public class Selector {
             if (update.getMessage().getText().equalsIgnoreCase("/returnMap/")){
                 return 37;
             }
+            if (update.getMessage().getText().equalsIgnoreCase("/fileContent/")){
+                return 38;
+            }
+            if (update.getMessage().getText().equalsIgnoreCase("/clearFiles/")){
+                return 39;
+            }
+
+
 
             return 20;
         }
         return 0;
     }
 
-    public long getDeleteFlag() {
-        return deleteFlag;
-    }
-
     public void setDeleteFlag(long deleteFlag) {
         this.deleteFlag = deleteFlag;
     }
+
+    public void setClearFlag(long clearFlag) { this.clearFlag = clearFlag; }
+
+    public void setBaseResetFlag(long baseResetFlag) {this.baseResetFlag = baseResetFlag; }
 }
 

@@ -23,9 +23,12 @@ private final List<String> addresses = new ArrayList<>();
 
         for (String address : addresses) {
             File dirToCheck = new File(address);
-            if (!dirToCheck.exists()) {
-                dirToCheck.mkdirs();
+            if (!dirToCheck.exists()){
+                if( dirToCheck.mkdirs()){
                 log.info("Directory " + address + " created");
+                } else {
+                    log.warn(" Can't create directory " + address);
+                }
             } else {
                 log.info("Directory " + address + " existed");
             }

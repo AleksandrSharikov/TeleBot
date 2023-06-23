@@ -27,6 +27,7 @@ public class Bot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     private final Selector selector;
     private final MediaCompiller mediaCompiller;
+    private final MessageCompiller messageCompiller;
     private final Search search;
     private final DBRegistrator dbRegistrator;
     private final MessageCompiller thankYou;
@@ -39,10 +40,11 @@ public class Bot extends TelegramLongPollingBot {
     private String addresses;
     private final String prefix = "./data/photoBase/";
 
-    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, Search search, DBRegistrator dbRegistrator, MessageCompiller thankYou, UserService userService, DictionaryService dictionaryService, FileService fileService, ExportImportDatabase exportImportDatabase) {
+    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, MessageCompiller messageCompiller, Search search, DBRegistrator dbRegistrator, MessageCompiller thankYou, UserService userService, DictionaryService dictionaryService, FileService fileService, ExportImportDatabase exportImportDatabase) {
         this.botConfig = botConfig;
         this.selector = selector;
         this.mediaCompiller = mediaCompiller;
+        this.messageCompiller = messageCompiller;
         this.search = search;
         this.dbRegistrator = dbRegistrator;
         this.thankYou = thankYou;
@@ -75,6 +77,9 @@ public class Bot extends TelegramLongPollingBot {
             case 30 -> receiveDB(update);
             case 35 -> sendDB(update);
             case 37 -> returnMap(update);
+            case 38 -> photoFiles(update);
+            case 39 -> askClearFiles(update);
+            case 40 -> clearFiles(update);
         }
     }
 
@@ -228,6 +233,10 @@ public class Bot extends TelegramLongPollingBot {
         sendOne(address, null);
     }
 
+    private void photoFiles(Update update) {
+        sendMessage(messageCompiller.setPhotoToString(fileService.photoList(prefix),prefix));
+    }
+
     private void sendOne(String address, String caption) {                  // bad style hardcode chatId. change!
         String extension = FilenameUtils.getExtension(address);
         if (extension.equals("jpg")) {
@@ -320,9 +329,17 @@ public class Bot extends TelegramLongPollingBot {
     private void askDeleteFile(Update update) {
         sendMessage(fileService.askDeleteFile(update));
     }
+    private void askClearFiles(Update update){
+        sendMessage(fileService.askClearFiles(update));
+    }
+
     private void deleteFile(Update update) {
         sendMessage(fileService.deleteFile(update));
     }
+    private void clearFiles(Update update){
+        sendMessage(fileService.clearFile(update, prefix));
+    }
+
     private void changeKeyword(Update update) {
         sendMessage(dbRegistrator.changeKeyWord(update));
     }

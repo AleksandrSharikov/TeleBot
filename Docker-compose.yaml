@@ -1,3 +1,4 @@
+version: '0.1'
 services:
   bot:
     container_name: telegram-bot
@@ -6,9 +7,9 @@ services:
     ports:
       - 8081:8081
     depends_on:
-      - MongoDB
-  MongoDB:
+      - mongo
+  mongo:
     image: mongo
-    container_name: "membase"
+    container_name: membase
     ports:
       - 27017:27017
