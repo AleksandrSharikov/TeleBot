@@ -18,7 +18,7 @@ public class FileService {
     private final Selector selector;
     Mem memToDelete;
 
-    public FileService(MemDao memDao, Selector selector) {
+    public FileService(MemDao memDao, UserService userService, DictionaryService dictionaryService, Selector selector) {
         this.memDao = memDao;
         this.selector = selector;
     }
@@ -73,11 +73,16 @@ public class FileService {
                 return "Remains only mapper files. \n Deleted " + count + " files";         // maybe add counter
             }
         return "Clearing canceled";
+
     }
+
+
 
 
     public boolean removeFile(String address){
         File file = new File(address);
             return file.delete();
     }
+
+
 }

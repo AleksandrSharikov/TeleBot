@@ -21,6 +21,9 @@ public class Selector {
         if (clearFlag == update.getMessage().getChatId()){
             return 40;
         }
+        if (baseResetFlag == update.getMessage().getChatId()){
+            return 42;
+        }
         if (update.getMessage().hasPhoto()) {
             log.info("Selector detect photo and set 2");
             return 2;
@@ -68,6 +71,11 @@ public class Selector {
             if (update.getMessage().getText().equalsIgnoreCase("/clearFiles/")){
                 return 39;
             }
+            // 40 Clear file  flag
+            if (update.getMessage().getText().equalsIgnoreCase("/resetBases/")){
+                return 41;
+            }
+            // 42 Reset bases
 
 
 

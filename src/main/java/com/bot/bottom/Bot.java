@@ -34,13 +34,15 @@ public class Bot extends TelegramLongPollingBot {
     private final UserService userService;
     private final DictionaryService dictionaryService;
     private final FileService fileService;
-    private final ExportImportDatabase exportImportDatabase;
+    private final BasesService basesService;
     private long chatId;
     private final String doc_name = "0";
     private String addresses;
     private final String prefix = "./data/photoBase/";
 
-    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, MessageCompiller messageCompiller, Search search, DBRegistrator dbRegistrator, MessageCompiller thankYou, UserService userService, DictionaryService dictionaryService, FileService fileService, ExportImportDatabase exportImportDatabase) {
+    public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, MessageCompiller messageCompiller,
+               Search search, DBRegistrator dbRegistrator, MessageCompiller thankYou, UserService userService,
+               DictionaryService dictionaryService, FileService fileService, BasesService basesService) {
         this.botConfig = botConfig;
         this.selector = selector;
         this.mediaCompiller = mediaCompiller;
@@ -51,7 +53,7 @@ public class Bot extends TelegramLongPollingBot {
         this.userService = userService;
         this.dictionaryService = dictionaryService;
         this.fileService = fileService;
-        this.exportImportDatabase = exportImportDatabase;
+        this.basesService = basesService;
     }
 
     @Override
@@ -80,10 +82,10 @@ public class Bot extends TelegramLongPollingBot {
             case 38 -> photoFiles(update);
             case 39 -> askClearFiles(update);
             case 40 -> clearFiles(update);
+            case 41 -> askResetBases(update);
+            case 42 -> resetBases(update);
         }
     }
-
-
 
 
 
@@ -227,7 +229,7 @@ public class Bot extends TelegramLongPollingBot {
             addresses = prefix + baseName;
             downloadFile(file, new File(addresses));
             sendMessage("File has been gotten");
-            sendMessage(exportImportDatabase.importBase(addresses));
+            sendMessage(basesService.importBase(addresses));
             log.info("File " + addresses + " Saved");
         } catch (TelegramApiException e) {
             log.error("TelegramApiException thrown by receivePhoto");
@@ -238,7 +240,7 @@ public class Bot extends TelegramLongPollingBot {
     // 35 Export DB______________________________________________
 
     private void sendDB(Update update) {
-        List<String> addressList = exportImportDatabase.exportBD();
+        List<String> addressList = basesService.exportBD();
         for(String address : addressList) {
             try {
                 SendDocument sendDocument = new SendDocument();
@@ -268,6 +270,15 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(fileService.clearFile(update, prefix));
     }
 
+    // 41 Ask reset bases _______________________________________________________________________
+    private void askResetBases(Update update) {
+        sendMessage(basesService.askResetBases(update));
+    }
+
+    // 42 Reset bases __________________________________________________________________________
+    private void resetBases(Update update) {
+        sendMessage(basesService.resetBases(update));
+    }
 
 
 

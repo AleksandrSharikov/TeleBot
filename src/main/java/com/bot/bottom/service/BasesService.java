@@ -6,11 +6,13 @@ import com.bot.bottom.dao.WordDao;
 import com.bot.bottom.model.Mem;
 import com.bot.bottom.model.User;
 import com.bot.bottom.model.Word;
+import com.bot.bottom.receiveService.Selector;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 //import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -26,19 +28,22 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ExportImportDatabase {
+public class BasesService {
     private final MemDao memDao;
     private final UserDao userDao;
     private final WordDao wordDao;
     private final FileService fileService;
+    private final Selector selector;
 
     private final String writePrefix = "./data/dbLog/";
+    private String add = "";
 
-    public ExportImportDatabase(MemDao memDao, UserDao userDao, WordDao wordDao, FileService fileService) {
+    public BasesService(MemDao memDao, UserDao userDao, WordDao wordDao, FileService fileService, Selector selector) {
         this.memDao = memDao;
         this.userDao = userDao;
         this.wordDao = wordDao;
         this.fileService = fileService;
+        this.selector = selector;
     }
 
     Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
@@ -60,6 +65,8 @@ public class ExportImportDatabase {
     Type memListType = new TypeToken<ArrayList<Mem>>(){}.getType();
     Type dictionaryType = new TypeToken<ArrayList<Word>>(){}.getType();
     Type userListType = new TypeToken<ArrayList<User>>(){}.getType();
+
+    // Import bases _______________________________________________________________________________
 
     public String importBase(String address){
         String answer = "Something went wrong";
@@ -89,22 +96,22 @@ public class ExportImportDatabase {
         return answer;
     }
 
+    // Export bases ____________________________________________________________________________________
+
     public List<String> exportBD(){
         List<String> answer = new ArrayList<>();
         String date = LocalDate.now().toString();
 
-        String writeAddress = writePrefix + date;
+        String writeAddress = writePrefix + date + add;
 
         List<Mem> memBase = memDao.findAll();
-        System.out.println(memBase.size());
         List<Word> dictionary = wordDao.findAll();
-        System.out.println(dictionary.size());
         List<User> userBase = userDao.findAll();
-        System.out.println(userBase.size());
+        log.info("Bases loged. User base: " + userBase.size() + "records. Dictionary: " + dictionary.size() +
+                "records. Mems: " + memBase.size() + " records.");
 
         if(!memBase.isEmpty()) {
             try (FileWriter writer = new FileWriter(writeAddress + "_mem.json")) {
-                System.out.println("memwriter " + writer);
                 gson.toJson(memBase, writer);
 
             } catch (IOException e) {
@@ -124,8 +131,6 @@ public class ExportImportDatabase {
             answer.add(writeAddress + "_dictionary.json");
         }
 
-        writeAddress = writePrefix + date;
-
         if(!userBase.isEmpty()) {
             try (FileWriter writer = new FileWriter(writeAddress + "_user.json")) {
                 gson.toJson(userBase, writer);
@@ -137,6 +142,54 @@ public class ExportImportDatabase {
 
         return answer;
     }
+
+    // Reset bases  ________________________________________________________________________
+
+    public String askResetBases(Update update){
+        selector.setBaseResetFlag(update.getMessage().getChatId());
+        return "What base do you want to reset?";
+    }
+
+    public String resetBases(Update update) {
+        selector.setBaseResetFlag(0);
+        long count = 0;
+        String text = update.getMessage().getText();
+        if(text.equalsIgnoreCase("Mems")){
+            add = "reset_" + update.getUpdateId();
+            exportBD();
+            memDao.deleteAll();
+            add = "";
+            return "Mem base is empty now";
+        }
+        if(text.equalsIgnoreCase("Dictionary")){
+            add = "reset_" + update.getUpdateId();
+            exportBD();
+            wordDao.deleteAll();
+            add = "";
+            return "Dictionary is empty now";
+        }
+        if(text.equalsIgnoreCase("Users")){
+            add = "reset_user_" + update.getUpdateId();
+            exportBD();
+            userDao.deleteAll();
+            add = "";
+            return "User base is empty now";
+        }
+        if(text.equalsIgnoreCase("All")){
+            add = "reset_all_" + update.getUpdateId();
+            exportBD();
+            wordDao.deleteAll();
+            userDao.deleteAll();
+            memDao.deleteAll();
+            add = "";
+            return "Bases reset";
+        }
+
+        return "Bases reset canceled";
+
+    }
+
+
 
 
 }
