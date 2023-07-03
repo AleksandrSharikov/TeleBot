@@ -39,9 +39,9 @@ public class DBRegistrator {
                 if (caption.contains("/")) {
                     parts = caption.split("/", 2);
                     name = parts[0].trim();
-                    caption = parts.length == 2 ? parts[1] : null;
+                    caption = parts[1];
                 }
-                if(caption != null){
+                if(!caption.isEmpty()){
                        parts = caption.split(",");
                        keyword = parts[0].trim();
                        if(parts.length > 1){

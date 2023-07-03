@@ -1,4 +1,4 @@
-version: '0.1'
+version: '1'
 services:
   bot:
     container_name: telegram-bot
@@ -7,9 +7,11 @@ services:
     ports:
       - 8081:8081
     depends_on:
-      - mongo
-  mongo:
+      - membase
+
+  membase:
     image: mongo
     container_name: membase
+    hostname: membase
     ports:
       - 27017:27017

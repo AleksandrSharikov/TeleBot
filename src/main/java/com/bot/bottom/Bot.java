@@ -19,6 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -65,6 +66,7 @@ public class Bot extends TelegramLongPollingBot {
 
         way = selector.select(update);
         switch (way) {
+            case 0 -> help();
             case 1 -> game();
             case 2 -> receivedPhoto(update);
             case 3 -> receiveVideoNote(update);
@@ -87,6 +89,10 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    // 0 HELP _____________________________
+    private void help(){
+        sendMessage(messageCompiller.help());
+    }
 
 
 
@@ -299,18 +305,37 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     // Send several media________________________________________________________________________
-    private void sendMedia(List<InputMedia> media) {
-        SendMediaGroup sendMediaGroup = new SendMediaGroup();
-        sendMediaGroup.setChatId(chatId);
-        sendMediaGroup.setMedias(media);
-        try {
-            execute(sendMediaGroup);
-        } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown by sendMedia");
-            log.error(e.getMessage());
+    private void sendMedia(List<InputMedia> media) {   // remains issue with reminder of one media
+        int counter = 0;
+        int totalCounter = 0;
+        if (media.size() > 9 * 5){
+            sendMessage("Too many items found.");
         }
-    }
+        List<InputMedia> page = new ArrayList<>();
+        for(InputMedia mediaToSend : media){
 
+                 page.add(mediaToSend);
+
+            if (counter++ == 8 || (totalCounter == media.size() - 1)) {
+                SendMediaGroup sendMediaGroup = new SendMediaGroup();
+                if(counter == 1){
+                    page.add(media.get(0));
+                }
+                sendMediaGroup.setChatId(chatId);
+                sendMediaGroup.setMedias(page);
+                try {
+                    execute(sendMediaGroup);
+                } catch (TelegramApiException e) {
+                    log.error("TelegramApiException thrown by sendMedia");
+                    log.error(e.getMessage());
+                }
+                counter = 0;
+                page = new ArrayList<>();
+            }
+            totalCounter++;
+        }
+
+    }
 
 
     // Send message_________________________________________________________________________
@@ -321,19 +346,28 @@ public class Bot extends TelegramLongPollingBot {
             sendOne(memDTO.mem().getAddress(), memDTO.comment());
         }
     }
+    private void sendMessage(List<String> listToSend){
+        for(String toSend : listToSend){
+            sendMessage(toSend);
+        }
+    }
     private void sendMessage(String textToSend) {
         sendMessage(chatId, textToSend);
     }
 
     private void sendMessage(Long chatId, String textToSend) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(String.valueOf(chatId));
-        sendMessage.setText(textToSend);
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown in sendMessage");
-            log.error(e.getMessage());
+        if (textToSend.length() > 3900){
+           sendMessage(messageCompiller.split(textToSend));
+        }  else {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(String.valueOf(chatId));
+            sendMessage.setText(textToSend);
+            try {
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                log.error("TelegramApiException thrown in sendMessage");
+                log.error(e.getMessage());
+            }
         }
     }
 

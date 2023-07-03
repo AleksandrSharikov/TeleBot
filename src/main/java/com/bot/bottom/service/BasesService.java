@@ -81,7 +81,7 @@ public class BasesService {
                     List<Word> dictionary = gson.fromJson(reader, dictionaryType);
                     wordDao.importDB(dictionary);
                 }
-                if(address.contains("users")) {
+                if(address.contains("user")) {
                     List<User> users = gson.fromJson(reader, userListType);
                     userDao.importDB(users);
                 }

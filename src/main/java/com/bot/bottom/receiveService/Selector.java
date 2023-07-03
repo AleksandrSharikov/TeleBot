@@ -45,6 +45,9 @@ public class Selector {
             return 30;
         }
         if (update.getMessage().hasText()) {
+            if (update.getMessage().getText().equalsIgnoreCase("/help/")) {
+                return 0;
+            }
             if (update.getMessage().getText().contains("=")) {
                 return 11;
             }

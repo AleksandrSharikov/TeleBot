@@ -1,5 +1,6 @@
 package com.bot.bottom.appRunners;
 
+import com.bot.bottom.Bot;
 import com.bot.bottom.dao.MemDao;
 import com.bot.bottom.dao.UserDao;
 import com.bot.bottom.dao.WordDao;
@@ -13,15 +14,18 @@ public class FillTables implements ApplicationRunner {
     private final MemDao memDao;
     private final UserDao userDao;
     private final WordDao wordDao;
+    private final Bot bot;
 
-    public FillTables(MemDao memDao, UserDao userDao, WordDao wordDao) {
+    public FillTables(MemDao memDao, UserDao userDao, WordDao wordDao, Bot bot) {
         this.memDao = memDao;
         this.userDao = userDao;
         this.wordDao = wordDao;
+        this.bot = bot;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+      //  System.out.println(bot.getBotToken());
         // memDao.deleteAll();
         // wordDao.deleteAll();
       //  userDao.deleteAll();

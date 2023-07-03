@@ -40,7 +40,11 @@ public class FileService {
         if(memDao.findByName(toDel[1].toLowerCase().trim()).isPresent()){
         memToDelete = memDao.findByName(toDel[1].toLowerCase().trim()).get();
             selector.setDeleteFlag(update.getMessage().getChatId());
-            return new MemDTO(memToDelete, "Are you sure you want to delete " + memToDelete.getName() + "?") ;
+            File mem = new File(memToDelete.getAddress());
+
+            return mem.isFile() ? new MemDTO(memToDelete
+                    , "Are you sure you want to delete " + memToDelete.getName() + "?") :
+                    new MemDTO(null, "DB record without file");
         }
         return new MemDTO(null, "Not found " + toDel[1].toLowerCase().trim() + " to delete") ;
     }
@@ -55,6 +59,8 @@ public class FileService {
                 memToDelete = null;
                 return "deleted";
             }
+            memDao.delete(memToDelete);
+            return "record removed";
         }
         return "Deleting canceled";
     }

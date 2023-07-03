@@ -5,10 +5,7 @@ import com.bot.bottom.model.Mem;
 import com.bot.bottom.service.DictionaryService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class MessageCompiller {
@@ -20,6 +17,118 @@ public class MessageCompiller {
     public MessageCompiller(DictionaryService dictionaryService, MemDao memDao) {
         this.dictionaryService = dictionaryService;
         this.memDao = memDao;
+    }
+
+    public String help(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Mem caption: ");
+        sb.append('\n');
+
+        sb.append("name/keyword,secondword1,secondword2,....");
+        sb.append('\n');
+
+        sb.append("or");
+        sb.append('\n');
+
+        sb.append("name/");
+        sb.append('\n');
+
+        sb.append("keyword,secondword1,secondword2,....");
+        sb.append('\n');
+
+        sb.append("keyword");
+        sb.append('\n');
+        sb.append('\n');
+
+        sb.append("Request format: ");
+        sb.append('\n');
+
+        sb.append("keyword");
+        sb.append('\n');
+
+        sb.append("or");
+        sb.append('\n');
+
+        sb.append("name/");
+        sb.append('\n');
+        sb.append('\n');
+
+
+
+
+        sb.append("___Comands___");
+        sb.append('\n');
+        sb.append('\n');
+
+        sb.append("/=/");
+        sb.append('\n');
+
+        sb.append("Add synonym (XXX = YYY || XXX = YYY, ZZZ)");
+        sb.append('\n');
+        sb.append('\n');
+
+        sb.append("/Key/");
+        sb.append('\n');
+
+        sb.append("Add keyword (NAME/key/NEW_KEY_WORD)");
+        sb.append('\n');
+        sb.append('\n');
+
+        sb.append("Delete/");
+        sb.append('\n');
+
+        sb.append("Delete mem file and record (Delete/NAME)");
+        sb.append('\n');
+        sb.append('\n');
+
+
+        sb.append("/returnMap/");
+        sb.append('\n');
+
+
+        sb.append("Returns mems mapped by keywords");
+        sb.append('\n');
+        sb.append('\n');
+
+
+        sb.append("/fileContent/");
+        sb.append('\n');
+
+        sb.append("Returns content of file folder");
+        sb.append('\n');
+        sb.append('\n');
+
+        sb.append("/clearFiles/");
+        sb.append('\n');
+
+        sb.append("Delete all files not presented in the database");
+        sb.append('\n');
+        sb.append('\n');
+
+        sb.append("/ExportDB/");
+        sb.append('\n');
+
+        sb.append("Sends in response current databases and saves them on the server");
+        sb.append('\n');
+        sb.append('\n');
+
+        sb.append("/resetBases/");
+        sb.append('\n');
+
+
+        sb.append("Clear databases and make its copies on the server");
+        sb.append('\n');
+        sb.append('\n');
+
+
+        sb.append("Databases can bi send without captions, but should contain in the file names");
+        sb.append('\n');
+
+
+        sb.append("\"mem\", \"dictionary\" and \"user\" respectively");
+        sb.append('\n');
+
+        return sb.toString();
     }
 
 
@@ -106,7 +215,8 @@ public class MessageCompiller {
         return label.toString();
     }
     
-    public String makeMap(Map<String, List<String>> map){
+    public List<String> makeMap(Map<String, List<String>> map){
+        List<String> answers = new ArrayList<>();
         StringBuilder answer = new StringBuilder();
         int count = 0;
         for(Map.Entry<String,List<String>> entry : map.entrySet()){
@@ -118,11 +228,15 @@ public class MessageCompiller {
                 answer.append('\n');
                 count++;
             }
-
+        if(answer.length() > 3800){
+            answers.add(answer.toString());
+                    answer = new StringBuilder();
+        }
         }
         answer.append("Total amount of names: ");
         answer.append(count);
-        return answer.toString();
+        answers.add(answer.toString());
+        return answers;
     }
     private void addSynonyms(StringBuilder sb, String word){
         if(dictionaryService.findSynonyms(word) != null) {
@@ -140,5 +254,28 @@ public class MessageCompiller {
         }
         sb.append('\n');
     }
+
+    public List<String> split(String toSplit){
+        return split(toSplit, 3900);
+    }
+    public List<String> split(String toSplit, int simbols){
+        List<String> answer = new ArrayList<>();
+        simbols--;
+        char[] arr = toSplit.toCharArray();
+        char[] part = new char[simbols];
+        int lim = (int)(simbols * 0.9);
+        int count = 0;
+        for(char ch : arr){
+            part[count++] = ch;
+            if(count >= lim && (ch == '\n' || count == simbols)){
+                count = 0;
+                answer.add( new String(part).trim());
+                part = new char[simbols];
+            }
+        }
+        answer.add( new String(part).trim());
+        return answer;
+    }
+
 
 }
