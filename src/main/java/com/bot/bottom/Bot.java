@@ -74,6 +74,7 @@ public class Bot extends TelegramLongPollingBot {
             case 5 -> receiveAnimation(update);
             case 11 -> dictionary(update);
             case 12 -> changeKeyword(update);
+            case 13 -> addTag(update);
             case 15 -> askDeleteFile(update);
             case 16 -> deleteFile(update);
             case 20 -> returnMems(update);
@@ -90,10 +91,9 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     // 0 HELP _____________________________
-    private void help(){
+    private void help() {
         sendMessage(messageCompiller.help());
     }
-
 
 
 // 2 receive photo_________________________________________________________
@@ -118,7 +118,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-//  3 receive video note________________________________________
+    //  3 receive video note________________________________________
     private void receiveVideoNote(Update update) {
         log.info("File received by video note processor");
         VideoNote videoNote = update.getMessage().getVideoNote();
@@ -194,10 +194,16 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(dbRegistrator.changeKeyWord(update));
     }
 
+    // 13 add tag ____________________________________________________________________________
+    private void addTag(Update update) {
+        sendMessage(dbRegistrator.addTag(update));
+    }
+
     // 15 ask delete file _______________________________________________________
     private void askDeleteFile(Update update) {
         sendMessage(fileService.askDeleteFile(update));
     }
+
     // 16 delete file_____________________________________________________________
     private void deleteFile(Update update) {
         sendMessage(fileService.deleteFile(update));
@@ -247,7 +253,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private void sendDB(Update update) {
         List<String> addressList = basesService.exportBD();
-        for(String address : addressList) {
+        for (String address : addressList) {
             try {
                 SendDocument sendDocument = new SendDocument();
                 sendDocument.setChatId(chatId);
@@ -260,19 +266,24 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
+
     // 37 Return map____________________________________________________________________
-    private void returnMap(Update update) { sendMessage(search.printMap());  }
+    private void returnMap(Update update) {
+        sendMessage(search.printMap());
+    }
+
     // 38 Send file list__________________________________________________________________
     private void photoFiles(Update update) {
-        sendMessage(messageCompiller.setPhotoToString(fileService.photoList(prefix),prefix));
+        sendMessage(messageCompiller.setPhotoToString(fileService.photoList(prefix), prefix));
     }
+
     // 39 Ask cleat files___________________________________________________________________________
-    private void askClearFiles(Update update){
+    private void askClearFiles(Update update) {
         sendMessage(fileService.askClearFiles(update));
     }
 
     // 40 Clear files__________________________________________________________________________
-    private void clearFiles(Update update){
+    private void clearFiles(Update update) {
         sendMessage(fileService.clearFile(update, prefix));
     }
 
@@ -287,12 +298,12 @@ public class Bot extends TelegramLongPollingBot {
     }
 
 
-
 // Send One media___________________________________________________________________________________
 
     private void sendOne(String address) {
         sendOne(address, null);
     }
+
     private void sendOne(String address, String caption) {                  // bad style hardcode chatId. change!
         String extension = FilenameUtils.getExtension(address);
         if (extension.equals("jpg")) {
@@ -308,17 +319,17 @@ public class Bot extends TelegramLongPollingBot {
     private void sendMedia(List<InputMedia> media) {   // remains issue with reminder of one media
         int counter = 0;
         int totalCounter = 0;
-        if (media.size() > 9 * 5){
+        if (media.size() > 9 * 5) {
             sendMessage("Too many items found.");
         }
         List<InputMedia> page = new ArrayList<>();
-        for(InputMedia mediaToSend : media){
+        for (InputMedia mediaToSend : media) {
 
-                 page.add(mediaToSend);
+            page.add(mediaToSend);
 
             if (counter++ == 8 || (totalCounter == media.size() - 1)) {
                 SendMediaGroup sendMediaGroup = new SendMediaGroup();
-                if(counter == 1){
+                if (counter == 1) {
                     page.add(media.get(0));
                 }
                 sendMediaGroup.setChatId(chatId);
@@ -346,19 +357,21 @@ public class Bot extends TelegramLongPollingBot {
             sendOne(memDTO.mem().getAddress(), memDTO.comment());
         }
     }
-    private void sendMessage(List<String> listToSend){
-        for(String toSend : listToSend){
+
+    private void sendMessage(List<String> listToSend) {
+        for (String toSend : listToSend) {
             sendMessage(toSend);
         }
     }
+
     private void sendMessage(String textToSend) {
         sendMessage(chatId, textToSend);
     }
 
     private void sendMessage(Long chatId, String textToSend) {
-        if (textToSend.length() > 3900){
-           sendMessage(messageCompiller.split(textToSend));
-        }  else {
+        if (textToSend.length() > 3900) {
+            sendMessage(messageCompiller.split(textToSend));
+        } else {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(String.valueOf(chatId));
             sendMessage.setText(textToSend);
@@ -416,14 +429,19 @@ public class Bot extends TelegramLongPollingBot {
     }
 
 
-
-    private void game() { }
+    private void game() {
+    }
 
     // Technical ________________________________________________________________________
     @Override
-    public String getBotUsername() { return botConfig.getBotName(); }
+    public String getBotUsername() {
+        return botConfig.getBotName();
+    }
+
     @Override
-    public String getBotToken() { return botConfig.getToken();}
+    public String getBotToken() {
+        return botConfig.getToken();
+    }
 
 
 }

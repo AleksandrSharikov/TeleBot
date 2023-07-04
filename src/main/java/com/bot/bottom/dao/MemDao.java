@@ -9,6 +9,7 @@ public interface MemDao {
     Mem save(Mem mem);
     void importDB(List<Mem> db);
     void setKeyWord(String name, String keyWord);
+    void addSecondWord(String name, String secondWord);
     List<Mem> findAll();
     Optional<Mem> findByName(String name);
     List<Mem> findByKeyword(String keyword);

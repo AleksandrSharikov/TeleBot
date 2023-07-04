@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class MemDaoImpl implements MemDao{
+public class MemDaoImpl implements MemDao {
     private final MemRepository memRepository;
 
     public MemDaoImpl(MemRepository memRepository) {
@@ -16,12 +16,13 @@ public class MemDaoImpl implements MemDao{
     }
 
     @Override
-    public Mem save(Mem mem){
-        if(memRepository.findById(mem.getName()).isEmpty()){
-        memRepository.save(mem);} else {
+    public Mem save(Mem mem) {
+        if (memRepository.findById(mem.getName()).isEmpty()) {
+            memRepository.save(mem);
+        } else {
             String name = mem.getName();
             int i = 1;
-            while(memRepository.findById(name + "_" + i).isPresent()){
+            while (memRepository.findById(name + "_" + i).isPresent()) {
                 i++;
             }
             mem.setName(name + "_" + i);
@@ -37,8 +38,11 @@ public class MemDaoImpl implements MemDao{
 
     @Override
     public void setKeyWord(String name, String keyWord) {
-        memRepository.setKeyword(name,keyWord);
+        memRepository.setKeyword(name, keyWord);
     }
+
+    @Override
+    public void addSecondWord(String name, String secondWord) {memRepository.addSecondWord(name, secondWord); }
 
     @Override
     public List<Mem> findAll() {
@@ -51,7 +55,9 @@ public class MemDaoImpl implements MemDao{
     }
 
     @Override
-    public List<Mem> findByKeyword(String keyword) { return memRepository.getAllAddresses(keyword); }
+    public List<Mem> findByKeyword(String keyword) {
+        return memRepository.getAllAddresses(keyword);
+    }
 
     @Override
     public List<Mem> findBySecondWord(String word) {

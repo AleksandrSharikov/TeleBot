@@ -19,4 +19,8 @@ public interface MemRepository extends MongoRepository<Mem, String> {
     @Update("{$set :  {'keyWord' :  ?1}}")
     void setKeyword(String name, String keyWord);
     Mem findMemByAddress(String address);
+
+    @Query("{'name' : ?0}")
+    @Update("{ '$push' : { 'secondWords' : ?1 } }")
+    void addSecondWord(String name, String secondWord);
 }

@@ -54,6 +54,9 @@ public class Selector {
             if (update.getMessage().getText().contains("/key/")) {
                 return 12;
             }
+            if (update.getMessage().getText().contains("/tag/")) {
+                return 13;
+            }
             if (update.getMessage().getText().contains("Delete/")) {
                 return 15;
             }

@@ -1,4 +1,4 @@
-version: '1'
+version: '3.8'
 services:
   bot:
     container_name: telegram-bot
@@ -8,6 +8,10 @@ services:
       - 8081:8081
     depends_on:
       - membase
+    environment:
+      BD-URL: mongodb://membase/membase
+    volumes:
+      - memvol:/data/
 
   membase:
     image: mongo
@@ -15,3 +19,6 @@ services:
     hostname: membase
     ports:
       - 27017:27017
+
+volumes:
+  memvol:

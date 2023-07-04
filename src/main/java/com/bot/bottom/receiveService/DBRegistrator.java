@@ -78,4 +78,30 @@ public class DBRegistrator {
                 "Keyword changed from " + old + " to " + memDao.findByName(keyWords[0]).get().getKeyWord());
     }
 
+
+    public MemDTO addTag(Update update){
+        String[] tag = update.getMessage().getText().toLowerCase().split("/tag/");
+        Set<String> old;
+        StringBuilder message = new StringBuilder();
+
+        if(tag.length != 2){
+            return new MemDTO(null, "Format error");
+        }
+        if(memDao.findByName(tag[0]).isEmpty()){
+            return new MemDTO(null, "File " + tag[0] + " have not been found");
+        }
+        old = memDao.findByName(tag[0]).get().getSecondWords();
+        if(old.contains(tag[1])){
+            return new MemDTO(null, "Tag already presented " + old);
+        }
+        memDao.addSecondWord (tag[0], tag[1]);
+        for (String s : memDao.findByName(tag[0]).get().getSecondWords()){
+            message.append('\n');
+            message.append(s);
+        }
+
+        return new MemDTO(memDao.findByName(tag[0]).get(),
+                "Tags list contains: " + message.toString());
+    }
+
 }
