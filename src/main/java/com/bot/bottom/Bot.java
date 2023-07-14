@@ -1,8 +1,10 @@
 package com.bot.bottom;
 
 import com.bot.bottom.config.BotConfig;
+import com.bot.bottom.dto.MediaToSave;
 import com.bot.bottom.dto.MemDTO;
 import com.bot.bottom.receiveService.DBRegistrator;
+import com.bot.bottom.receiveService.ReceiveMedia;
 import com.bot.bottom.receiveService.Selector;
 import com.bot.bottom.compillers.MediaCompiller;
 import com.bot.bottom.compillers.MessageCompiller;
@@ -29,9 +31,9 @@ public class Bot extends TelegramLongPollingBot {
     private final Selector selector;
     private final MediaCompiller mediaCompiller;
     private final MessageCompiller messageCompiller;
+    private final ReceiveMedia receiveMedia;
     private final Search search;
     private final DBRegistrator dbRegistrator;
-    private final MessageCompiller thankYou;
     private final UserService userService;
     private final DictionaryService dictionaryService;
     private final FileService fileService;
@@ -42,15 +44,15 @@ public class Bot extends TelegramLongPollingBot {
     private final String prefix = "./data/photoBase/";
 
     public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, MessageCompiller messageCompiller,
-               Search search, DBRegistrator dbRegistrator, MessageCompiller thankYou, UserService userService,
+               ReceiveMedia receiveMedia, Search search, DBRegistrator dbRegistrator, UserService userService,
                DictionaryService dictionaryService, FileService fileService, BasesService basesService) {
         this.botConfig = botConfig;
         this.selector = selector;
         this.mediaCompiller = mediaCompiller;
         this.messageCompiller = messageCompiller;
+        this.receiveMedia = receiveMedia;
         this.search = search;
         this.dbRegistrator = dbRegistrator;
-        this.thankYou = thankYou;
         this.userService = userService;
         this.dictionaryService = dictionaryService;
         this.fileService = fileService;
@@ -68,10 +70,7 @@ public class Bot extends TelegramLongPollingBot {
         switch (way) {
             case 0 -> help();
             case 1 -> game();
-            case 2 -> receivedPhoto(update);
-            case 3 -> receiveVideoNote(update);
-            case 4 -> receiveVideo(update);
-            case 5 -> receiveAnimation(update);
+            case 2 -> receiveMedia(update);
             case 11 -> dictionary(update);
             case 12 -> changeKeyword(update);
             case 13 -> addTag(update);
@@ -81,6 +80,7 @@ public class Bot extends TelegramLongPollingBot {
             case 21 -> sendMessage("Забор покрасьте!");
             case 30 -> receiveDB(update);
             case 35 -> sendDB(update);
+            case 36 -> returnTags(update);
             case 37 -> returnMap(update);
             case 38 -> photoFiles(update);
             case 39 -> askClearFiles(update);
@@ -95,93 +95,18 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(messageCompiller.help());
     }
 
-
-// 2 receive photo_________________________________________________________
-
-    private void receivedPhoto(Update update) {
-        log.info("File received by photo processor");
-        List<PhotoSize> photoList = update.getMessage().getPhoto();
-        GetFile getFile = new GetFile();
-
-        getFile.setFileId(photoList.get(photoList.size() - 1).getFileId());
-        String getID = String.valueOf(update.getUpdateId());
-
+    // 2 Receive media ___________________________________________________________________
+    private void receiveMedia(Update update){
+        MediaToSave receivedMedia = receiveMedia.receiveMedia(update);
         try {
-            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            addresses = prefix + getID + "_" + doc_name + ".jpg";
-            downloadFile(file, new File(addresses));
-            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 2)));
-            log.info("File " + addresses + " Saved");
+            downloadFile(execute(receivedMedia.getFile()), new File(receivedMedia.address()));
         } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown by receivePhoto");
-            log.error(e.getMessage());
+            log.error("TelegramApiException thrown by download");
         }
+        sendMessage(messageCompiller.sayThankYou(dbRegistrator.register(update, receivedMedia.address(), receivedMedia.type())));
+        log.info("File {} saved", receivedMedia.address());
     }
 
-    //  3 receive video note________________________________________
-    private void receiveVideoNote(Update update) {
-        log.info("File received by video note processor");
-        VideoNote videoNote = update.getMessage().getVideoNote();
-        GetFile getFile = new GetFile();
-
-        getFile.setFileId(videoNote.getFileId());
-        String getID = String.valueOf(update.getUpdateId());
-
-        try {
-            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            addresses = prefix + getID + "_" + doc_name + ".mp4";
-            downloadFile(file, new File(addresses));
-            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 3)));
-            log.info("File " + addresses + " Saved");
-        } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown by receivePhoto");
-            log.error(e.getMessage());
-        }
-    }
-
-    // 4 receive video________________________________________________________
-
-    private void receiveVideo(Update update) {
-        log.info("File received by video processor");
-        Video video = update.getMessage().getVideo();
-        GetFile getFile = new GetFile();
-
-        getFile.setFileId(video.getFileId());
-        String getID = String.valueOf(update.getUpdateId());
-
-        try {
-            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            addresses = prefix + getID + "_" + doc_name + ".mp4";
-            downloadFile(file, new File(addresses));
-            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 4)));
-            log.info("File " + addresses + " Saved");
-        } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown by receivePhoto");
-            log.error(e.getMessage());
-        }
-    }
-
-    // 5 receive animation_______________________________________________________________
-
-    private void receiveAnimation(Update update) {
-        log.info("File received by video processor");
-        Animation animation = update.getMessage().getAnimation();
-        GetFile getFile = new GetFile();
-
-        getFile.setFileId(animation.getFileId());
-        String getID = String.valueOf(update.getUpdateId());
-
-        try {
-            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-            addresses = prefix + getID + "_" + doc_name + ".mp4";
-            downloadFile(file, new File(addresses));
-            sendMessage(thankYou.sayThankYou(dbRegistrator.register(update, addresses, 5)));
-            log.info("File " + addresses + " Saved");
-        } catch (TelegramApiException e) {
-            log.error("TelegramApiException thrown by receivePhoto");
-            log.error(e.getMessage());
-        }
-    }
 
     // 11 Working with dictionary_______________________________________________________
     private void dictionary(Update update) {
@@ -212,13 +137,14 @@ public class Bot extends TelegramLongPollingBot {
     // 20 return mems _______________________________________________________________
     private void returnMems(Update update) {
         List<String> mems = search.search(update.getMessage().getText());
+        log.info("Returning list of {} mem(s).", mems.size());
         if (mems.size() > 1) {
             sendMedia(mediaCompiller.addressToMedia(mems));
         }
         if (mems.size() == 1) {
             String caption = null;
-            if (update.getMessage().getText().matches("^name/.*")) {
-                caption = thankYou.makeLabel(search.findMemByAddress(mems.get(0)));
+            if (update.getMessage().getText().toLowerCase().matches("^name/.*")) {
+                caption = messageCompiller.makeLabel(search.findMemByAddress(mems.get(0)));
             }
             sendOne(mems.get(0), caption);
         }
@@ -267,6 +193,11 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    // 36 return tags list _______________________________________________________
+    private void returnTags(Update update){
+        sendMessage(search.printTags());
+    }
+
     // 37 Return map____________________________________________________________________
     private void returnMap(Update update) {
         sendMessage(search.printMap());
@@ -300,10 +231,6 @@ public class Bot extends TelegramLongPollingBot {
 
 // Send One media___________________________________________________________________________________
 
-    private void sendOne(String address) {
-        sendOne(address, null);
-    }
-
     private void sendOne(String address, String caption) {                  // bad style hardcode chatId. change!
         String extension = FilenameUtils.getExtension(address);
         if (extension.equals("jpg")) {
@@ -316,37 +243,27 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     // Send several media________________________________________________________________________
-    private void sendMedia(List<InputMedia> media) {   // remains issue with reminder of one media
-        int counter = 0;
-        int totalCounter = 0;
-        if (media.size() > 9 * 5) {
-            sendMessage("Too many items found.");
-        }
-        List<InputMedia> page = new ArrayList<>();
-        for (InputMedia mediaToSend : media) {
+    private void sendMedia(List<InputMedia> media) {
+        if(media.size() > 9){
+            sendPagesMedia(mediaCompiller.divideList(media));
+        } else {
 
-            page.add(mediaToSend);
-
-            if (counter++ == 8 || (totalCounter == media.size() - 1)) {
-                SendMediaGroup sendMediaGroup = new SendMediaGroup();
-                if (counter == 1) {
-                    page.add(media.get(0));
-                }
-                sendMediaGroup.setChatId(chatId);
-                sendMediaGroup.setMedias(page);
-                try {
-                    execute(sendMediaGroup);
-                } catch (TelegramApiException e) {
-                    log.error("TelegramApiException thrown by sendMedia");
-                    log.error(e.getMessage());
-                }
-                counter = 0;
-                page = new ArrayList<>();
+            SendMediaGroup sendMediaGroup = new SendMediaGroup();
+            sendMediaGroup.setChatId(chatId);
+            sendMediaGroup.setMedias(media);
+            try {
+                execute(sendMediaGroup);
+            } catch (TelegramApiException e) {
+                log.error("TelegramApiException thrown by sendMedia");
+                log.error(e.getMessage());
             }
-            totalCounter++;
         }
-
     }
+    private void sendPagesMedia(List<List<InputMedia>> media){
+        media.stream().filter(s -> s.size() <= 9).forEach(this::sendMedia);
+    }
+
+
 
 
     // Send message_________________________________________________________________________
@@ -364,7 +281,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendMessage(String textToSend) {
+    public void sendMessage(String textToSend) {
         sendMessage(chatId, textToSend);
     }
 
@@ -386,14 +303,6 @@ public class Bot extends TelegramLongPollingBot {
 
 // Send photo or Video _____________________________________________________________________
 
-    private void sendPhoto(String address) {
-        sendPhoto(chatId, address);
-    }
-
-    private void sendPhoto(long chatId, String address) {
-        sendPhoto(chatId, address, null);
-    }
-
     private void sendPhoto(Long chatId, String address, String caption) {
         try {
             SendPhoto sendPhoto = new SendPhoto();
@@ -407,13 +316,6 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendVideo(String address) {
-        sendVideo(chatId, address);
-    }
-
-    private void sendVideo(long chatId, String address) {
-        sendVideo(chatId, address, null);
-    }
 
     private void sendVideo(Long chatId, String address, String caption) {
         try {

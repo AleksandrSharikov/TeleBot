@@ -91,7 +91,7 @@ public class DBRegistrator {
             return new MemDTO(null, "File " + tag[0] + " have not been found");
         }
         old = memDao.findByName(tag[0]).get().getSecondWords();
-        if(old.contains(tag[1])){
+        if(old != null && old.contains(tag[1])){
             return new MemDTO(null, "Tag already presented " + old);
         }
         memDao.addSecondWord (tag[0], tag[1]);

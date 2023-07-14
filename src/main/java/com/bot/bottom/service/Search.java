@@ -6,10 +6,7 @@ import com.bot.bottom.model.Mem;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -49,7 +46,7 @@ public class Search {
             if (memDao.findByName(toFind).isPresent()){
                 answer.add(memDao.findByName(toFind).get().getAddress());
             }
-            if (!memDao.findByKeyword(toFind).isEmpty()){
+            if (memDao.findByKeyword(toFind) != null){
                 memDao.findByKeyword(toFind).stream().map(Mem::getAddress)
                         .forEach(answer::add);
             }
@@ -62,7 +59,7 @@ public class Search {
                     }
                 }
             }
-            if (!memDao.findBySecondWord(toFind).isEmpty()){
+            if (memDao.findBySecondWord(toFind) != null){
                 memDao.findBySecondWord(toFind).stream().map(Mem::getAddress)
                         .forEach(answer::add);
             }
@@ -70,9 +67,35 @@ public class Search {
         }
     }
 
-    public List<String>  printMap(){
-        return messageCompiller.makeMap(compileMap());
+    public List<String> printMap(){ return messageCompiller.makeMap(compileMap()); }
+
+    public String printTags(){ return messageCompiller.makeTags(tagsSet());}
+    public List<String> tagsForWeb() {return messageCompiller.tagsForWeb(tagsSet());}
+
+    private Map<String, Integer> tagsSet() {
+        var answer = new HashMap<String, Integer>(){
+            public void add(String key){
+                if (this.containsKey(key)){
+                    super.merge(key, 1, (v1,v2) -> v1 + 1);
+                } else {
+                    super.put(key,1);
+                }
+            }
+        };
+        for(Mem mem : memDao.findAll()){
+            if(!mem.getName().matches("\\d{9}")){
+                answer.add(mem.getName());
+            }
+            answer.add(mem.getKeyWord());
+            if(mem.getSecondWords() != null){
+                for (String word : mem.getSecondWords()){
+                    answer.add(word);
+                }
+            }
+        }
+        return answer;
     }
+
 
     private Map<String,List<String>> compileMap() {
         List<Mem> allMems = memDao.findAll();

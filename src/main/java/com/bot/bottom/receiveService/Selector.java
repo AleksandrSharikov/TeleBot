@@ -13,7 +13,7 @@ public class Selector {
     private long baseResetFlag;
 
     public int select(Update update) {
-        log.info("Selector get message " + update);
+        log.info("Selector get message:   " + update + '\n');
 
         if (deleteFlag == update.getMessage().getChatId()) {
             return 16;
@@ -30,15 +30,15 @@ public class Selector {
         }
         if (update.getMessage().hasVideoNote()) {
             log.info("Selector detect video note and set 3");
-            return 3;
+            return 2;
         }
         if (update.getMessage().hasVideo()) {
             log.info("Selector detect video and set 4");
-            return 4;
+            return 2;
         }
         if (update.getMessage().hasAnimation()) {
             log.info("Selector detect animation and set 5");
-            return 5;
+            return 2;
         }
         if (update.getMessage().hasDocument() && update.getMessage().getDocument().getMimeType().equals("application/json")){
             log.info("Selector detect JSON and set 30");
@@ -46,18 +46,23 @@ public class Selector {
         }
         if (update.getMessage().hasText()) {
             if (update.getMessage().getText().equalsIgnoreCase("/help/")) {
+                log.info("Selector detect help request and return 0");
                 return 0;
             }
             if (update.getMessage().getText().contains("=")) {
+                log.info("Selector find = and returns 11");
                 return 11;
             }
             if (update.getMessage().getText().contains("/key/")) {
+                log.info("Selector find /key/ and returns 12");
                 return 12;
             }
             if (update.getMessage().getText().contains("/tag/")) {
+                log.info("Selector find /tag/ and returns 13");
                 return 13;
             }
             if (update.getMessage().getText().contains("Delete/")) {
+                log.info("Selector find Delete/ and returns 15");
                 return 15;
             }
                         // 16 returns in the top
@@ -66,19 +71,28 @@ public class Selector {
             }
                         // 30 receive DB
             if (update.getMessage().getText().equalsIgnoreCase("/ExportDB/")) {
+                log.info("Selector find /ExportDB/ and returns 35");
                 return 35;
             }
+            if (update.getMessage().getText().equalsIgnoreCase("/tags/")){
+                log.info("Selector find /tags/ and returns 36");
+                return 36;
+            }
             if (update.getMessage().getText().equalsIgnoreCase("/returnMap/")){
+                log.info("Selector find /returnMap/ and returns 37");
                 return 37;
             }
             if (update.getMessage().getText().equalsIgnoreCase("/fileContent/")){
+                log.info("Selector find /fileContent/ and returns 38");
                 return 38;
             }
             if (update.getMessage().getText().equalsIgnoreCase("/clearFiles/")){
+                log.info("Selector find /clearFiles/ and returns 39");
                 return 39;
             }
             // 40 Clear file  flag
             if (update.getMessage().getText().equalsIgnoreCase("/resetBases/")){
+                log.info("Selector find /resetBases/ and returns 40");
                 return 41;
             }
             // 42 Reset bases

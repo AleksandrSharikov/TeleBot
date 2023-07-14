@@ -3,7 +3,9 @@ package com.bot.bottom.compillers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.objects.media.*;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,18 +36,32 @@ public class MediaCompiller {
         log.info("media contains " + medias.size() + " records");
         return medias;
     }
+    public List<List<InputMedia>> divideList(List<InputMedia> inList){
+        List<List<InputMedia>> answer = new ArrayList<>();
 
-    public InputMedia addressToMedia(String address){
-        extension = FilenameUtils.getExtension(address);
-        name = FilenameUtils.getName(address);
-        media = switch (extension) {
-            case "jpg" -> new InputMediaPhoto();
-            case "mp4" -> new InputMediaVideo();
-            //    case "gif" -> new InputMediaAnimation();
-            default -> new InputMediaDocument();
-        };
-        media.setMedia(new File(address), name);
-        return media;
+
+        int counter = 0;
+        int totalCounter = 0;
+
+        List<InputMedia> page = new ArrayList<>();
+        int size = inList.size();
+        for (InputMedia mediaToSend : inList) {
+
+            page.add(mediaToSend);
+
+            if (counter++ == 8 || (totalCounter == size - 1)) {
+                if (counter == 1) {
+                    page.add(inList.get(0));
+                }
+                answer.add(page);
+                counter = 0;
+                page = new ArrayList<>();
+            }
+            totalCounter++;
+        }
+
+        return answer;
     }
+
 
 }

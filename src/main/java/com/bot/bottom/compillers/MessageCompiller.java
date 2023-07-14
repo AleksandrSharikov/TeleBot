@@ -6,6 +6,7 @@ import com.bot.bottom.service.DictionaryService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageCompiller {
@@ -19,7 +20,7 @@ public class MessageCompiller {
         this.memDao = memDao;
     }
 
-    public String help(){
+    public String help() {
         StringBuilder sb = new StringBuilder();
         sb.append("Mem caption: ");
         sb.append('\n');
@@ -52,8 +53,6 @@ public class MessageCompiller {
         sb.append("name/");
         sb.append('\n');
         sb.append('\n');
-
-
 
 
         sb.append("___Comands___");
@@ -132,48 +131,48 @@ public class MessageCompiller {
     }
 
 
-    public String sayThankYou(Mem mem){
+    public String sayThankYou(Mem mem) {
         int cs = 0;
         StringBuilder thank = new StringBuilder();
         thank.append(mem.getSender());
         thank.append(", спасибо, понял, принял обработал\n");
         thank.append("Сохранил ");
-        if(mem.getType() == 2){
+        if (mem.getType() == 2) {
             thank.append(" твою картинку c \n");
-        }  else if(mem.getType() == 4){
+        } else if (mem.getType() == 4) {
             thank.append(" твоё видео c \n");
-        } else if(mem.getType() == 5){
+        } else if (mem.getType() == 5) {
             thank.append(" твою гифку с\n");
         } else {
             thank.append(" что бы это ни было c \n");
         }
         thank.append("названием " + mem.getName() + '\n');
         thank.append("ключевым словом: " + mem.getKeyWord() + '\n');
-        if(mem.getSecondWords() != null) {
+        if (mem.getSecondWords() != null) {
             thank.append("и другими словами: ");
             for (String sw : mem.getSecondWords()) {
                 thank.append(sw + ", ");
             }
             thank.replace(thank.length() - 2, thank.length() - 1, "\n");
-          //  thank.append('\n');
+            //  thank.append('\n');
         }
         cs = random.nextInt(3);
-        if(cs == 0) {
+        if (cs == 0) {
             thank.append("Пиши исчё!");
         }
-        if(cs == 1) {
+        if (cs == 1) {
             thank.append("Смешно");
         }
-        if(cs == 2) {
+        if (cs == 2) {
             thank.append("Наверное смешно. Я не знаю - я бот");
         }
         return thank.toString();
     }
 
-    public String setPhotoToString(Set<String> files, String prefix){
+    public String setPhotoToString(Set<String> files, String prefix) {
         StringBuilder sb = new StringBuilder();
         int count = 0;
-        for(String s : files){
+        for (String s : files) {
             sb.append(s);
             sb.append(" -> ");
             sb.append(memDao.findDyAddress(prefix + s) == null
@@ -186,7 +185,7 @@ public class MessageCompiller {
         return sb.toString();
     }
 
-    public String makeLabel(Mem mem){
+    public String makeLabel(Mem mem) {
         StringBuilder label = new StringBuilder();
         boolean flagFirst = false;
         label.append("Name : ");
@@ -196,14 +195,17 @@ public class MessageCompiller {
         label.append(mem.getKeyWord());
         addSynonyms(label, mem.getKeyWord());
         label.append("Other associations : ");
-        for (String sw : mem.getSecondWords()) {
-            if(!flagFirst){
-                flagFirst = true;
-            } else {
-            label.append(", ");}
-            label.append(sw);
+        if (!mem.getSecondWords().isEmpty()) {
+            for (String sw : mem.getSecondWords()) {
+                if (!flagFirst) {
+                    flagFirst = true;
+                } else {
+                    label.append(", ");
+                }
+                label.append(sw);
+            }
+            flagFirst = false;
         }
-        flagFirst = false;
         label.append('\n');
         label.append("Posted by : ");
         label.append(mem.getSender());
@@ -214,32 +216,33 @@ public class MessageCompiller {
 
         return label.toString();
     }
-    
-    public List<String> makeMap(Map<String, List<String>> map){
+
+    public List<String> makeMap(Map<String, List<String>> map) {
         List<String> answers = new ArrayList<>();
         StringBuilder answer = new StringBuilder();
         int count = 0;
-        for(Map.Entry<String,List<String>> entry : map.entrySet()){
+        for (Map.Entry<String, List<String>> entry : map.entrySet()) {
             answer.append(entry.getKey());
             addSynonyms(answer, entry.getKey());
-            for(String name : entry.getValue()){
+            for (String name : entry.getValue()) {
                 answer.append("          ");
                 answer.append(name);
                 answer.append('\n');
                 count++;
             }
-        if(answer.length() > 3800){
-            answers.add(answer.toString());
-                    answer = new StringBuilder();
-        }
+            if (answer.length() > 3800) {
+                answers.add(answer.toString());
+                answer = new StringBuilder();
+            }
         }
         answer.append("Total amount of names: ");
         answer.append(count);
         answers.add(answer.toString());
         return answers;
     }
-    private void addSynonyms(StringBuilder sb, String word){
-        if(dictionaryService.findSynonyms(word) != null) {
+
+    private void addSynonyms(StringBuilder sb, String word) {
+        if (dictionaryService.findSynonyms(word) != null) {
             boolean flagFirst = false;
             sb.append(" = (");
             for (String s : dictionaryService.findSynonyms(word)) {
@@ -255,27 +258,42 @@ public class MessageCompiller {
         sb.append('\n');
     }
 
-    public List<String> split(String toSplit){
+    public List<String> split(String toSplit) {
         return split(toSplit, 3900);
     }
-    public List<String> split(String toSplit, int simbols){
+
+    public List<String> split(String toSplit, int simbols) {
         List<String> answer = new ArrayList<>();
         simbols--;
         char[] arr = toSplit.toCharArray();
         char[] part = new char[simbols];
-        int lim = (int)(simbols * 0.9);
+        int lim = (int) (simbols * 0.9);
         int count = 0;
-        for(char ch : arr){
+        for (char ch : arr) {
             part[count++] = ch;
-            if(count >= lim && (ch == '\n' || count == simbols)){
+            if (count >= lim && (ch == '\n' || count == simbols)) {
                 count = 0;
-                answer.add( new String(part).trim());
+                answer.add(new String(part).trim());
                 part = new char[simbols];
             }
         }
-        answer.add( new String(part).trim());
+        answer.add(new String(part).trim());
         return answer;
     }
 
 
+    public String makeTags(Map<String, Integer> tags) {
+        StringBuilder sb = new StringBuilder();
+        Comparator<Map.Entry<String, Integer>> entryComparator = Comparator.comparing(Map.Entry::getValue);
+        entryComparator = entryComparator.thenComparing(Map.Entry::getKey);
+
+       tags.entrySet().stream().sorted(entryComparator)
+               .map(s ->  (s.getKey() + " -> " + s.getValue() + '\n')).forEach(sb::append);
+        return sb.toString();
+    }
+    public List<String> tagsForWeb(Map<String, Integer> tags){
+
+        return tags.entrySet().stream().map(s ->  (s.getKey() + " -> " + s.getValue() + '\n')) // check sorting by key
+                .sorted().collect(Collectors.toList());
+    }
 }
