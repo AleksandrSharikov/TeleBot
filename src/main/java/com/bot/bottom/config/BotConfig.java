@@ -14,6 +14,9 @@ public class BotConfig {
     @Value("${file.prefix}")
     String prefix;
 
+    @Value("${media.prefix}")
+    String mediaPrefix;
+
     public String getBotName() {
         return botName;
     }
@@ -24,5 +27,9 @@ public class BotConfig {
 
     public String getPrefix() {
         return prefix;
+    }
+
+    public String getMediaPrefix() {
+        return mediaPrefix;
     }
 }

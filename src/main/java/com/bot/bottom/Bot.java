@@ -41,7 +41,7 @@ public class Bot extends TelegramLongPollingBot {
     private long chatId;
     private final String doc_name = "0";
     private String addresses;
-    private final String prefix = "./data/photoBase/";
+    private final String prefix;
 
     public Bot(BotConfig botConfig, Selector selector, MediaCompiller mediaCompiller, MessageCompiller messageCompiller,
                ReceiveMedia receiveMedia, Search search, DBRegistrator dbRegistrator, UserService userService,
@@ -57,6 +57,7 @@ public class Bot extends TelegramLongPollingBot {
         this.dictionaryService = dictionaryService;
         this.fileService = fileService;
         this.basesService = basesService;
+        prefix = botConfig.getMediaPrefix();
     }
 
     @Override
