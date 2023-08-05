@@ -72,6 +72,7 @@ public class Bot extends TelegramLongPollingBot {
             case 0 -> help();
             case 1 -> game();
             case 2 -> receiveMedia(update);
+            case 3 -> returnVersion(update);
             case 11 -> dictionary(update);
             case 12 -> changeKeyword(update);
             case 13 -> addTag(update);
@@ -91,6 +92,8 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+
+
     // 0 HELP _____________________________
     private void help() {
         sendMessage(messageCompiller.help());
@@ -106,6 +109,9 @@ public class Bot extends TelegramLongPollingBot {
         }
         sendMessage(messageCompiller.sayThankYou(dbRegistrator.register(update, receivedMedia.address(), receivedMedia.type())));
         log.info("File {} saved", receivedMedia.address());
+    }
+    private void returnVersion(Update update) {
+        sendMessage(botConfig.getVersion());
     }
 
 

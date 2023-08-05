@@ -29,16 +29,21 @@ public class Selector {
             return 2;
         }
         if (update.getMessage().hasVideoNote()) {
-            log.info("Selector detect video note and set 3");
+            log.info("Selector detect video note and set 2");
             return 2;
         }
         if (update.getMessage().hasVideo()) {
-            log.info("Selector detect video and set 4");
+            log.info("Selector detect video and set 2");
             return 2;
         }
         if (update.getMessage().hasAnimation()) {
-            log.info("Selector detect animation and set 5");
+            log.info("Selector detect animation and set 2");
             return 2;
+        }
+
+        if (update.getMessage().getText().equalsIgnoreCase("/ver/")){
+            log.info("Selector find /ver/ and returns 3");
+            return 3;
         }
         if (update.getMessage().hasDocument() && update.getMessage().getDocument().getMimeType().equals("application/json")){
             log.info("Selector detect JSON and set 30");
